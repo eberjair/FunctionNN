@@ -70,6 +70,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Charts\WPFChart2Dlib.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -77,6 +81,18 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Charts\ChartStyle.cs" />
+    <Compile Include="Charts\Customs.cs" />
+    <Compile Include="Charts\DataCollection.cs" />
+    <Compile Include="Charts\DataSeries.cs" />
+    <Compile Include="Charts\Legend.cs" />
+    <Compile Include="Charts\LineStyle.cs" />
+    <Compile Include="Charts\MyVisualHost.cs" />
+    <Compile Include="Charts\PointCollSimply.cs" />
+    <Compile Include="Charts\Symbols.cs" />
+    <Compile Include="Charts\WPFChart2Dlib.xaml.cs">
+      <DependentUpon>WPFChart2Dlib.xaml</DependentUpon>
     </Compile>
     <Compile Include="FletcherReevesIteration.cs" />
     <Compile Include="Functions\FunctionDefinition.cs" />
@@ -93,7 +109,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MathClasses\ExtMath.cs" />
     <Compile Include="NeuralNetwork.cs" />
     <Compile Include="NNParameters.cs" />
     <Compile Include="ProgressWindow.xaml.cs">
