@@ -136,5 +136,8 @@ namespace FunctionNeuralNetwork
             
         }
 
+
     }
+
+    
 }
