@@ -28,7 +28,7 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 <WindowsFormsHost Name="goNNHost" Margin="3"/>
-                <oxy:PlotView Model="{Binding PlotModel}"  Grid.Column="1"/>
+                <oxy:PlotView Name="goPlotView" Model="{Binding PlotModel}" Grid.Column="1"  />
             </Grid>
 
             <WindowsFormsHost Name="goFuncHost" Margin="3" Grid.Row="1"/>

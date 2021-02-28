@@ -26,11 +26,12 @@ namespace FunctionNeuralNetwork
         BackgroundWorker goWorker;
         List<FunctionDefinition> gsFunctionDefinitions;
         ProgressWindow progressWindow;
+        FunctionViewer FunctionViewer;
 
         public MainWindow()
         {
             InitializeComponent();
-
+            FunctionViewer = new FunctionViewer(goFuncHost);
             gsFunctionDefinitions = new List<FunctionDefinition>();
             //gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, new double[2] { -Math.PI/4, Math.PI/4 }, new double[2] { -Math.PI/4, Math.PI/4 }, new double[2] { -1, 1 }, "sin(x1+x2)"));
             gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, new double[2] { -2, 2 }, new double[2] { -2, 2 }, new double[2] { -1, 1 }, "sin(x1+x2)"));
