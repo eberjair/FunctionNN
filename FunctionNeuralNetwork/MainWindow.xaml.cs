@@ -27,11 +27,15 @@ namespace FunctionNeuralNetwork
         List<FunctionDefinition> gsFunctionDefinitions;
         ProgressWindow progressWindow;
         FunctionViewer FunctionViewer;
+        NNViewer NNViewer;
 
         public MainWindow()
         {
             InitializeComponent();
+            NeuralNetwork = new NeuralNetwork();
             FunctionViewer = new FunctionViewer(goFuncHost);
+            NNViewer = new NNViewer(goNNHost, NeuralNetwork);
+
             gsFunctionDefinitions = new List<FunctionDefinition>();
             //gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, new double[2] { -Math.PI/4, Math.PI/4 }, new double[2] { -Math.PI/4, Math.PI/4 }, new double[2] { -1, 1 }, "sin(x1+x2)"));
             gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, new double[2] { -2, 2 }, new double[2] { -2, 2 }, new double[2] { -1, 1 }, "sin(x1+x2)"));
@@ -41,7 +45,7 @@ namespace FunctionNeuralNetwork
                 goFunctionComboBox.Items.Add(gsFunctionDefinitions[i].Label);
 
             goFunctionComboBox.SelectedIndex = 0;
-            NeuralNetwork = new NeuralNetwork();
+            
             goWorker = new BackgroundWorker { WorkerReportsProgress = true };
             goWorker.DoWork += ExecuteLearning;
             goWorker.RunWorkerCompleted += GoWorker_RunWorkerCompleted;

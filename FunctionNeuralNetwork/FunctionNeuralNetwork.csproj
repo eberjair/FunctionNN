@@ -16,7 +16,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -87,7 +87,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="FunctionViewer.xaml">
+    <Page Include="Viewers\FunctionViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -103,7 +103,8 @@
     <Compile Include="FletcherReevesIteration.cs" />
     <Compile Include="Functions\FunctionDefinition.cs" />
     <Compile Include="Functions\FunctionsImplementations.cs" />
-    <Compile Include="FunctionViewer.xaml.cs">
+    <Compile Include="Viewers\AxonRenderer.cs" />
+    <Compile Include="Viewers\FunctionViewer.xaml.cs">
       <DependentUpon>FunctionViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="LearnArguments.cs" />
@@ -112,6 +113,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Viewers\NNViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ProgressWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -120,6 +125,10 @@
   <ItemGroup>
     <Compile Include="NeuralNetwork.cs" />
     <Compile Include="NNParameters.cs" />
+    <Compile Include="Viewers\NeuronRenderer.cs" />
+    <Compile Include="Viewers\NNViewer.xaml.cs">
+      <DependentUpon>NNViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ProgressWindow.xaml.cs">
       <DependentUpon>ProgressWindow.xaml</DependentUpon>
     </Compile>
