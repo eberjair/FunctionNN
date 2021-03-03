@@ -61,7 +61,7 @@ namespace FunctionNeuralNetwork
         private void GoLearningButton_Click(object sender, RoutedEventArgs e)
         {
             progressWindow = new ProgressWindow(goWorker);
-            LearnMethod method = goMethodComboBox.SelectedIndex == 0 ? LearnMethod.MaxDescend : LearnMethod.FletcherReeves;
+            LearnMethod method = LearnMethod.MaxDescend;
             GradientFactor factor = GradientFactor.n;;
             switch(goGradientFactorComboBox.SelectedIndex)
             {

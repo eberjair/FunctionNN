@@ -7,14 +7,14 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:local="clr-namespace:FunctionNeuralNetwork"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" MinHeight="450" MinWidth="600">
+        Title="Sample Neural Network" Height="450" Width="1100" MinHeight="450" MinWidth="1100">
     <Window.DataContext>
         <local:ChartModel/>
     </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="500"/>
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid.RowDefinitions>
@@ -36,64 +36,161 @@
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="240"/>
-                <RowDefinition Height="145"/>
+                <RowDefinition Height="290"/>
+                <RowDefinition Height="120"/>
             </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
 
-            <GroupBox Grid.Row="0" Header="Learning">
+            <GroupBox Header="Weights">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+
+                    <Label Content="Current weights:" VerticalAlignment="Center"/>
+                    <TextBlock Name="goWeightsTB" Grid.Row="1"/>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Name="goSaveB" Content="Save" Margin="5,5"/>
+                        <Button Name="goLoadB" Grid.Column="1" Content="Load" Margin="5,5"/>
+                        <Button Name="goRandomizeB" Grid.Column="2" Content="Randomize" Margin="5,5"/>
+
+                    </Grid>
+                    
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Row="1" Header="Visualization options">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="3*"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Content="Sync visualization" VerticalAlignment="Center"/>
+                        <Label Content="X1 Intervals (10-200)" Grid.Row="1" VerticalAlignment="Center"/>
+                        <Label Content="X2 Intervals (10-200)" Grid.Row="2" VerticalAlignment="Center"/>
+                        <CheckBox Name="goSyncCB" Grid.Column="1" VerticalAlignment="Center"/>
+                        <xctk:IntegerUpDown Name="goX1IntervalsIUD" Grid.Column="1" Grid.Row="1" Margin="10,3" Minimum="10" Maximum="200" Value="20"/>
+                        <xctk:IntegerUpDown Name="goX2IntervalsIUD" Grid.Column="1" Grid.Row="2" Margin="10,3" Minimum="10" Maximum="200" Value="20"/>
+                    </Grid>
+                    <Button Name="goRefreshB" Content="Refresh" Grid.Row="1" Margin="20,2"/>
+                </Grid>
+                
+                
+            </GroupBox>
+
+            <GroupBox Grid.Row="0"  Grid.Column="1" Header="Learning options">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0">
+                    <Grid Grid.Row="0" Grid.ColumnSpan="2">
                         <Grid.RowDefinitions>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
+                            <RowDefinition Height="2*"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="2*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="130"/>
+                            <ColumnDefinition Width="80"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Content="Function:" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <Label Content="Iterations (50-10000):" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="1"/>
-                        <Label Content="Method:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="2"/>
-                        <Label Content="Grad factor:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="3"/>
-                        <ComboBox Margin="10, 10,10,10" Grid.Column="1" Name="goFunctionComboBox">
+                        <Label Content="X1 Domain:" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <Label Content="X2 Domain:" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <Label Content="Y Range:" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <Label Content="Iterations&#x0a;(50-10000):" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="4"/>
+                        <Label Content="Grad factor:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="5"/>
+                        <Label Content="Interval&#x0a;visualization:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="6"/>
+
+                        <ComboBox Margin="10,3" Grid.Column="1" Name="goFunctionComboBox" HorizontalContentAlignment="Right">
 
                         </ComboBox>
-                        <xctk:IntegerUpDown Name="goIterationsUpDown" Grid.Column="1" Grid.Row="1" Margin="10" Minimum="50" Maximum="10000000" Value="1000"/>
-                        <ComboBox Margin="10" Grid.Column="1" Grid.Row="2" Name="goMethodComboBox">
-                            <ComboBoxItem IsSelected="True" Content="Max descend"/>
-                            <ComboBoxItem Content="Fleetcher-Reeves gradient"/>
-                        </ComboBox>
-                        <ComboBox Margin="10" Grid.Column="1" Grid.Row="3" Name="goGradientFactorComboBox">
+                        <Grid Grid.Row="1" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <xctk:IntegerUpDown Name="goX1minIUP" Margin="10,3,5,3" Value="-2"/>
+                            <xctk:IntegerUpDown Name="goX1maxIUP" Grid.Column="1" Margin="5,3,10,3" Value="2"/>
+                        </Grid>
+                        <Grid Grid.Row="2" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <xctk:IntegerUpDown Name="goX2minIUP" Margin="10,3,5,3" Value="-2"/>
+                            <xctk:IntegerUpDown Name="goX2maxIUP" Grid.Column="1" Margin="5,3,10,3" Value="2"/>
+                        </Grid>
+                        <Grid Grid.Row="3" Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <xctk:IntegerUpDown Name="goYminIUP" Margin="10,3,5,3" Value="-1"/>
+                            <xctk:IntegerUpDown Name="goYmaxIUP" Grid.Column="1" Margin="5,3,10,3" Value="1"/>
+                        </Grid>
+                        
+                        <xctk:IntegerUpDown Name="goIterationsUpDown" Grid.Column="1" Grid.Row="4" Margin="10,16" Minimum="50" Maximum="10000000" Value="1000"/>
+                        
+                        <ComboBox Margin="10,3" Grid.Column="1" Grid.Row="5" Name="goGradientFactorComboBox" HorizontalContentAlignment="Right">
                             <ComboBoxItem IsSelected="True" Content="0.1/n"/>
                             <ComboBoxItem Content="0.1/ln(n+1)"/>
                             <ComboBoxItem Content="0.1"/>
                             <ComboBoxItem Content="0.01"/>
                         </ComboBox>
+
+                        <xctk:IntegerUpDown Name="goLearningIntervalVisualizationIUD" Grid.Column="1" Grid.Row="6" Margin="10,16" Minimum="0" Value="0"/>
+
                     </Grid>
-                    <Button Grid.Row="1" Margin="40,5,40,5" Content="Execute" Name="goLearningButton" Click="GoLearningButton_Click"/>
+                    <Button Grid.Row="1" Margin="40,5" Content="Execute" Name="goLearningButton" Click="GoLearningButton_Click" Grid.Column="1" />
                 </Grid>
 
             </GroupBox>
 
-            <GroupBox Grid.Row="1" Header="Test current parameters">
+            <GroupBox Grid.Row="1" Grid.Column="1" Header="Test current weights">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="2*"/>
+                        <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="130"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Number of executions:" VerticalAlignment="Center"/>
-                        <xctk:IntegerUpDown Grid.Column="1"  Margin="10,20" Minimum="50" Maximum="10000" Value="1000" Name="goTestUpDown"/>
+                        <Label Content="Number of executions:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        <xctk:IntegerUpDown Grid.Column="1"  Margin="10,5" Minimum="50" Maximum="10000" Value="1000" Name="goTestUpDown"/>
+                        <Label Content="Interval visualization:" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Right"/>
+                        <xctk:IntegerUpDown Name="goTestingIntervalVisualizationIUD" Grid.Column="1" Grid.Row="1" Margin="10,5" Minimum="0" Value="0"/>
                     </Grid>
                     <Button Grid.Row="1" Margin="40,5" Content="Execute" Name="goTestButton"/>
                 </Grid>
