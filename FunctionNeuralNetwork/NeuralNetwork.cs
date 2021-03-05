@@ -28,7 +28,7 @@ namespace FunctionNeuralNetwork
         double[] WjG;
 
 
-        public NNParameters Parameters { get; private set; }
+        NNParameters Parameters;
 
         public NeuralNetwork()
         {
@@ -74,7 +74,7 @@ namespace FunctionNeuralNetwork
             return 1 / (1 + Math.Exp(-x));
         }
 
-        private double CalculateS3(double x1, double x2)
+        public double CalculateS3(double x1, double x2)
         {
             X1 = x1;
             X2 = x2;
@@ -99,8 +99,6 @@ namespace FunctionNeuralNetwork
             }
             S3 = Sigmoid(z3);
             return S3;
-
-            
         }
 
         public void LearnMaxDescend(double x1, double x2, double Y, double lnGradientFactor, out double s3)
@@ -234,7 +232,10 @@ namespace FunctionNeuralNetwork
                 
         }
 
-
+        public void SaveParameter(string lcPath)
+        {
+            Parameters.Save(lcPath);
+        }
 
     }
 }

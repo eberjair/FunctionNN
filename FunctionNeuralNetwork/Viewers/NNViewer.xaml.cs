@@ -47,7 +47,8 @@ namespace FunctionNeuralNetwork
         List<AxonRenderer> gsS2S3Axons;
 
 
-        bool gbRenderized;
+        public bool gbRenderized;
+        
 
         public NNViewer(System.Windows.Forms.Integration.WindowsFormsHost loWFH, NeuralNetwork neuralNetwork)
         {
@@ -226,9 +227,10 @@ namespace FunctionNeuralNetwork
 
             for(int j=0; j<81; j++)
             {
-                double[] color = j<81? lookupTable.GetColor(NeuralNetwork.Wj[j]) : lookupTable.GetColor(NeuralNetwork.B3);
+                double[] color = j<80? lookupTable.GetColor(NeuralNetwork.Wj[j]) : lookupTable.GetColor(NeuralNetwork.B3);
                 gsS2S3Axons[j].SetColor(color[0], color[1], color[2]);
             }
+            goInteractor.Render();
         }
     
     }

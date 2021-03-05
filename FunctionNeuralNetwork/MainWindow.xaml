@@ -53,16 +53,18 @@
                     </Grid.RowDefinitions>
 
                     <Label Content="Current weights:" VerticalAlignment="Center"/>
-                    <TextBlock Name="goWeightsTB" Grid.Row="1"/>
+                    <ScrollViewer Grid.Row="1">
+                        <TextBlock Name="goWeightsTB" />
+                    </ScrollViewer>
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Button Name="goSaveB" Content="Save" Margin="5,5"/>
-                        <Button Name="goLoadB" Grid.Column="1" Content="Load" Margin="5,5"/>
-                        <Button Name="goRandomizeB" Grid.Column="2" Content="Randomize" Margin="5,5"/>
+                        <Button Name="goSaveB" Content="Save" Margin="5,5" Click="GoSaveB_Click"/>
+                        <Button Name="goLoadB" Grid.Column="1" Content="Load" Margin="5,5" Click="GoLoadB_Click"/>
+                        <Button Name="goRandomizeB" Grid.Column="2" Content="Randomize" Margin="5,5" Click="GoRandomizeB_Click"/>
 
                     </Grid>
                     
@@ -89,7 +91,7 @@
                         <Label Content="Sync visualization" VerticalAlignment="Center"/>
                         <Label Content="X1 Intervals (10-200)" Grid.Row="1" VerticalAlignment="Center"/>
                         <Label Content="X2 Intervals (10-200)" Grid.Row="2" VerticalAlignment="Center"/>
-                        <CheckBox Name="goSyncCB" Grid.Column="1" VerticalAlignment="Center"/>
+                        <CheckBox Name="goSyncCB" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,5" Width="119" IsChecked="True"/>
                         <xctk:IntegerUpDown Name="goX1IntervalsIUD" Grid.Column="1" Grid.Row="1" Margin="10,3" Minimum="10" Maximum="200" Value="20"/>
                         <xctk:IntegerUpDown Name="goX2IntervalsIUD" Grid.Column="1" Grid.Row="2" Margin="10,3" Minimum="10" Maximum="200" Value="20"/>
                     </Grid>
@@ -127,7 +129,7 @@
                         <Label Content="Grad factor:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="5"/>
                         <Label Content="Interval&#x0a;visualization:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="6"/>
 
-                        <ComboBox Margin="10,3" Grid.Column="1" Name="goFunctionComboBox" HorizontalContentAlignment="Right">
+                        <ComboBox Margin="10,3" Grid.Column="1" Name="goFunctionComboBox" HorizontalContentAlignment="Right" VerticalContentAlignment="Center">
 
                         </ComboBox>
                         <Grid Grid.Row="1" Grid.Column="1">
@@ -157,7 +159,7 @@
                         
                         <xctk:IntegerUpDown Name="goIterationsUpDown" Grid.Column="1" Grid.Row="4" Margin="10,16" Minimum="50" Maximum="10000000" Value="1000"/>
                         
-                        <ComboBox Margin="10,3" Grid.Column="1" Grid.Row="5" Name="goGradientFactorComboBox" HorizontalContentAlignment="Right">
+                        <ComboBox Margin="10,3" Grid.Column="1" Grid.Row="5" Name="goGradientFactorComboBox" HorizontalContentAlignment="Right" VerticalContentAlignment="Center">
                             <ComboBoxItem IsSelected="True" Content="0.1/n"/>
                             <ComboBoxItem Content="0.1/ln(n+1)"/>
                             <ComboBoxItem Content="0.1"/>

@@ -17,13 +17,15 @@ using Kitware.VTK;
 
 namespace FunctionNeuralNetwork
 {
-    public enum RendererEnum { Function, NeuralNetwork }
+    public enum RendererEnum { Function, NeuralNetwork, Both }
 
     /// <summary>
     /// Interaction logic for FunctionViewer.xaml
     /// </summary>
     public partial class FunctionViewer : UserControl
     {
+        MainWindow goParent;
+
         //Rendering stuff
         System.Windows.Forms.Panel goPanel;
         System.Windows.Forms.Integration.WindowsFormsHost goWFormsHost;
@@ -57,7 +59,7 @@ namespace FunctionNeuralNetwork
         vtkOrientationMarkerWidget goOrientationFunction;
         vtkOrientationMarkerWidget goOrientationNN;
 
-        bool gbRenderized;
+        public bool gbRenderized;
 
         public bool Synchronized
         {
@@ -96,8 +98,9 @@ namespace FunctionNeuralNetwork
             }
         }
 
-        public FunctionViewer(System.Windows.Forms.Integration.WindowsFormsHost loWFH)
+        public FunctionViewer(System.Windows.Forms.Integration.WindowsFormsHost loWFH, MainWindow parent)
         {
+            goParent = parent;
             InitializeComponent();
 
             //Interop host control
@@ -160,6 +163,7 @@ namespace FunctionNeuralNetwork
                 InitializeVisualizationObjects();
 
                 gbRenderized = true;
+                goParent.VisualizeFunction(RendererEnum.Both);
             }
         }
 
@@ -221,8 +225,8 @@ namespace FunctionNeuralNetwork
             goOrientationFunction.SetInteractor(goInteractor);
             goOrientationNN.SetInteractor(goInteractor);
 
-            goOrientationFunction.SetViewport(-.15, -.15, .3, .3);
-            goOrientationNN.SetViewport(.351, -.15, .801, .3);
+            goOrientationFunction.SetViewport(0, 0, .3, .3);
+            goOrientationNN.SetViewport(0.5, 0, 0.8, .3);
 
             goOrientationFunction.SetEnabled(1);
 
@@ -260,6 +264,11 @@ namespace FunctionNeuralNetwork
                     points.InsertPoint(i + offset, bounds[0] + i * deltaX1, x2coord, data[i, j]);
                 }
             }
+            if (rendererToUse == RendererEnum.Function)
+                goRendererFunction.ResetCamera();
+            else
+                goRendererNN.ResetCamera();
+            
             goInteractor.Render();
         }
 
