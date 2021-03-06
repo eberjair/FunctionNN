@@ -12,17 +12,20 @@ namespace FunctionNeuralNetwork
     public enum GradientFactor { n, ln, c1, c2 }
     public class LearnOptions
     {
-        public LearnMethod LearnMethod { get;  }
         public GradientFactor GradientFactor { get;  }
-        public int Iterations { get;  }
+        public int Iterations { get; }
+        public int CurrentIterations { get; }
+
+        public int Interval { get; }
         public FunctionDefinition FunctionDefinition { get; }
         
 
-        public LearnOptions(LearnMethod method, GradientFactor factor, int iterations, FunctionDefinition functionDefinition)
+        public LearnOptions(GradientFactor factor, int currentIterations, int iterations, int interval, FunctionDefinition functionDefinition)
         {
-            LearnMethod = method;
             GradientFactor = factor;
             Iterations = iterations;
+            Interval = interval;
+            CurrentIterations = currentIterations;
             FunctionDefinition = functionDefinition;
         }
     }

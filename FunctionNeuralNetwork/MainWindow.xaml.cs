@@ -30,18 +30,28 @@ namespace FunctionNeuralNetwork
         ProgressWindow progressWindow;
         FunctionViewer FunctionViewer;
         NNViewer NNViewer;
+        Random random;
+        double[] X1Domain;
+        double[] X2Domain;
+        double[] YRange;
+        double[] gsErrorResults;
+        int gnNextResultsIndex;
 
         public MainWindow()
         {
             InitializeComponent();
+            random = new Random();
             NeuralNetwork = new NeuralNetwork();
             FunctionViewer = new FunctionViewer(goFuncHost, this);
             NNViewer = new NNViewer(goNNHost, NeuralNetwork);
 
-            gsFunctionDefinitions = new List<FunctionDefinition>();
-            //gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, new double[2] { -Math.PI/4, Math.PI/4 }, new double[2] { -Math.PI/4, Math.PI/4 }, new double[2] { -1, 1 }, "sin(x1+x2)"));
-            gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, new double[2] { -2, 2 }, new double[2] { -2, 2 }, new double[2] { -1, 1 }, "sin(x1+x2)"));
+            X1Domain = new double[2] { (double)goX1minIUP.Value , (double)goX1maxIUP.Value};
+            X2Domain = new double[2] { (double)goX2minIUP.Value, (double)goX2maxIUP.Value };
+            YRange = new double[2] { (double)goYminIUP.Value, (double)goYmaxIUP.Value };
+
             //Adding functions
+            gsFunctionDefinitions = new List<FunctionDefinition>();
+            gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, "y=sin(x1+x2)"));
 
             for (int i = 0; i < gsFunctionDefinitions.Count; i++)
                 goFunctionComboBox.Items.Add(gsFunctionDefinitions[i].Label);
@@ -55,6 +65,13 @@ namespace FunctionNeuralNetwork
 
             goSyncCB.Checked += GoSyncCB_Checked;
             goSyncCB.Unchecked += GoSyncCB_Checked;
+
+            goX1minIUP.ValueChanged += DomainValueChanged;
+            goX1maxIUP.ValueChanged += DomainValueChanged;
+            goX2minIUP.ValueChanged += DomainValueChanged;
+            goX2maxIUP.ValueChanged += DomainValueChanged;
+            goYminIUP.ValueChanged += DomainValueChanged;
+            goYmaxIUP.ValueChanged += DomainValueChanged;
         }
 
         private void GoSyncCB_Checked(object sender, RoutedEventArgs e)
@@ -101,14 +118,22 @@ namespace FunctionNeuralNetwork
                 double[,] lsFunctionData = new double[NumberX1Values, NumberX2Values];
                 double[,] lsNNData = new double[NumberX1Values, NumberX2Values];
 
+                if(x1Min >= x1Max || x2Min>=x2Max)
+                {
+                    MessageBox.Show("Invalid function domain", "Parameters error",MessageBoxButton.OK);
+                    return;
+                }
+
                 if(renderer == RendererEnum.Both)
                 {
                     for (int i = 0; i < NumberX1Values; i++)
                     {
                         for (int j = 0; j < NumberX2Values; j++)
                         {
-                            lsFunctionData[i, j] = function.Evaluate(x1Min + i * x1Delta, x2Min + j * x2Delta)[0];
-                            lsNNData[i, j] = NeuralNetwork.CalculateS3(x1Min + i * x1Delta, x2Min + j * x2Delta);
+                            double x1 = x1Min + i * x1Delta;
+                            double x2 = x2Min + j * x2Delta;
+                            lsFunctionData[i, j] = function.Evaluate(x1 , x2 );
+                            lsNNData[i, j] = GetYFromNormalized(NeuralNetwork.CalculateS3(NormalizeX1(x1), NormalizeX2(x2)));
                         }
                     }
                     FunctionViewer.VisualizeData(new double[4] { x1Min, x1Max, x2Min, x2Max }, lsFunctionData, RendererEnum.Function);
@@ -120,7 +145,7 @@ namespace FunctionNeuralNetwork
                     {
                         for (int j = 0; j < NumberX2Values; j++)
                         {
-                            lsFunctionData[i, j] = function.Evaluate(x1Min + i * x1Delta, x2Min + j * x2Delta)[0];
+                            lsFunctionData[i, j] = function.Evaluate(x1Min + i * x1Delta, x2Min + j * x2Delta);
                             
                         }
                     }
@@ -132,7 +157,7 @@ namespace FunctionNeuralNetwork
                     {
                         for (int j = 0; j < NumberX2Values; j++)
                         {
-                            lsNNData[i, j] = NeuralNetwork.CalculateS3(x1Min + i * x1Delta, x2Min + j * x2Delta);
+                            lsNNData[i, j] = GetYFromNormalized(NeuralNetwork.CalculateS3(NormalizeX1(x1Min + i * x1Delta), NormalizeX2(x2Min + j * x2Delta)));
                         }
                     }
                     FunctionViewer.VisualizeData(new double[4] { x1Min, x1Max, x2Min, x2Max }, lsNNData, RendererEnum.NeuralNetwork);
@@ -144,14 +169,52 @@ namespace FunctionNeuralNetwork
         private void GoWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             //goResultsTextBox.Text = (string)e.Result;
+            IntervalResult intervalResult = e.Result as IntervalResult;
+            double[] lsIntervalResults = intervalResult.IterationsError;
+            
+            for(int i = 0; i < lsIntervalResults.Length; i++, gnNextResultsIndex++)
+            {
+                gsErrorResults[gnNextResultsIndex] = lsIntervalResults[i];
+            }
+            if(intervalResult.IsLastInterval)
+            {
+                double[] dataToVisualize;
+                if(gsErrorResults.Length > 100)
+                {
+                    dataToVisualize = new double[100];
+                    int step = (int)(gsErrorResults.Length / 100d);
+                    for(int i=0; i<100; i++)
+                    {
+                        for(int j=0; j<step; j++)
+                        {
+                            dataToVisualize[i] += gsErrorResults[i * step + j];
+                        }
+                        dataToVisualize[i] /= (double)step;
+                    }
+                }
+                else
+                {
+                    dataToVisualize = gsErrorResults;
+                }
+                ChartModel chartModel = new ChartModel(dataToVisualize);
+                goPlotView.Model = chartModel.PlotModel;
+            }
             progressWindow.AllowClosing();
             progressWindow.Close();
         }
 
         private void GoLearningButton_Click(object sender, RoutedEventArgs e)
         {
-            progressWindow = new ProgressWindow(goWorker);
-            LearnMethod method = LearnMethod.MaxDescend;
+            double x1Min = (double)goX1minIUP.Value;
+            double x1Max = (double)goX1maxIUP.Value;
+            double x2Min = (double)goX2minIUP.Value;
+            double x2Max = (double)goX2maxIUP.Value;
+            if (x1Min >= x1Max || x2Min >= x2Max)
+            {
+                MessageBox.Show("Invalid function domain", "Parameters error", MessageBoxButton.OK);
+                return;
+            }
+            
             GradientFactor factor = GradientFactor.n;;
             switch(goGradientFactorComboBox.SelectedIndex)
             {
@@ -159,12 +222,33 @@ namespace FunctionNeuralNetwork
                 case 2: factor = GradientFactor.c1; break;
                 case 3: factor = GradientFactor.c2; break;
             }
-            LearnOptions learnOptions = new LearnOptions(method, factor, (int)goIterationsUpDown.Value, gsFunctionDefinitions[goFunctionComboBox.SelectedIndex]);
-            LearnArguments learnArguments = new LearnArguments(learnOptions, NeuralNetwork);
-            goWorker.RunWorkerAsync(argument: learnArguments);
-            progressWindow.ShowDialog();
+            int iterations = (int)goIterationsUpDown.Value;
+            int interval = (int)goLearningIntervalVisualizationIUD.Value;
+            if (interval == 0) interval = (int)goIterationsUpDown.Value;
+            int steps = (int)Math.Ceiling((double)iterations / (double)interval);
+            
+            if(steps > 10)
+            {
+                MessageBoxResult boxResult = MessageBox.Show("There will be " + (steps - 1) + " visualizations before finishing the learning process.\nDo you want to continue?", "Learning process", MessageBoxButton.YesNo);
+                if (boxResult == MessageBoxResult.No) return;
+            }
 
-
+            progressWindow = new ProgressWindow(goWorker);
+            FunctionDefinition function = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex];
+            gsErrorResults = new double[iterations];
+            gnNextResultsIndex = 0;
+            for (int currentIterations = 0; currentIterations< iterations; )
+            {
+                LearnOptions learnOptions = new LearnOptions(factor, currentIterations, iterations, interval, function);
+                LearnArguments learnArguments = new LearnArguments(learnOptions, NeuralNetwork);
+                goWorker.RunWorkerAsync(argument: learnArguments);
+                progressWindow.ShowDialog();
+                currentIterations += interval;
+                UpdateUIWeights();
+                progressWindow = new ProgressWindow(goWorker);
+                if (currentIterations < iterations)
+                    MessageBox.Show("Interval executed", "Learning Process", MessageBoxButton.OK);
+            }
         }
 
 
@@ -176,59 +260,71 @@ namespace FunctionNeuralNetwork
             NeuralNetwork neuralNetwork = arguments.NeuralNetwork;
             FunctionDefinition functionDefinition = arguments.LearnOptions.FunctionDefinition;
             int iterations = options.Iterations;
-            LearnMethod learnMethod = options.LearnMethod;
+            int interval = options.Interval;
+            int currentIterarions = options.CurrentIterations;
             GradientFactor gradientFactor = options.GradientFactor;
-
-
             double lnEta = 0.1;
-
-            List<double[]> lsLastGradients = new List<double[]>()
-            {
-                new double[5] { 1, 1, 1, 1, 1 }, 
-                new double[25] { 1, 1, 1, 1, 1 , 1, 1, 1, 1, 1 , 1, 1, 1, 1, 1 , 1, 1, 1, 1, 1 , 1, 1, 1, 1, 1 },
-                new double[10] { 1, 1, 1, 1, 1 , 1, 1, 1, 1, 1 },
-                new double[10] { 1, 1, 1, 1, 1 , 1, 1, 1, 1, 1 },
-                new double[5] { 0, 0, 0, 0, 0 },
-                new double[25] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                new double[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                new double[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-            };
             double s3 = 0;
-            double error;
-            string result = "";
-            FletcherReevesIteration lastIteration = new FletcherReevesIteration();
-            FletcherReevesIteration newIteration = new FletcherReevesIteration();
-            for (int i=0; i< iterations; i++)
+            double[] lsError = new double[Math.Min(interval, iterations-currentIterarions)];
+
+            for (int i=0; i< interval && currentIterarions<iterations; i++, currentIterarions++)
             {
                 switch(gradientFactor)
                 {
                     case GradientFactor.c2: lnEta = 0.01; break;
-                    case GradientFactor.n: lnEta = 0.1 / (i + 1); break;
-                    case GradientFactor.ln: lnEta = 0.1 / Math.Log(i + 2); break;
+                    case GradientFactor.n: lnEta = 0.1 / (currentIterarions + 1); break;
+                    case GradientFactor.ln: lnEta = 0.1 / Math.Log(currentIterarions + 2); break;
                 }
 
-                double[] x1 = functionDefinition.GenerateX(0);
-                double[] x2 = functionDefinition.GenerateX(1);
-                double[] y = functionDefinition.Evaluate(x1[0], x2[0]);
+                double[] x1 = GenerateX1();
+                double[] x2 = GenerateX2();
+                double y = functionDefinition.Evaluate(x1[1], x2[1]);
+                double yNormalized = NormalizeY(y);
 
-                    
-                switch (learnMethod)
-                {
-                    case LearnMethod.FletcherReeves:
-                            neuralNetwork.LearnFletcherReeves(x1[1], x2[1], y[1], lnEta, i==0, lastIteration, out newIteration, out s3);
-                            lastIteration = newIteration;
-                        break;
-                    case LearnMethod.MaxDescend:
-                            neuralNetwork.LearnMaxDescend(x1[1], x2[1], y[1], lnEta, out s3);
-                        break;
-                }
-                error = Math.Abs(s3 - y[1]);
-                if (i < 20 || i > iterations - 20)
-                    result = result + "Iteration:" + i + ". Error: " + error + "\n";
-                loWorker.ReportProgress(100 * i /iterations);
+                neuralNetwork.LearnMaxDescend(x1[0], x2[0], yNormalized, lnEta, out s3);
+                lsError[i] = Math.Abs(s3 - yNormalized);
+                loWorker.ReportProgress(100 * i /interval);
             }
-            e.Result = result;
-            
+            IntervalResult intervalResult = new IntervalResult(currentIterarions == iterations, lsError);
+            e.Result = intervalResult;
+        }
+
+        double[] GenerateX1()
+        {
+            double x1min = X1Domain[0];
+            double x1max = X1Domain[1];
+            double[] values = new double[2] { random.NextDouble(), 0 };
+            values[1] = values[0] * (x1max - x1min) + x1min;
+            return values;
+        }
+
+        double[] GenerateX2()
+        {
+            double x2min = X2Domain[0];
+            double x2max = X2Domain[1];
+            double[] values = new double[2] { random.NextDouble(), 0 };
+            values[1] = values[0] * (x2max - x2min) + x2min;
+            return values;
+        }
+
+        double NormalizeX1(double x1)
+        {
+            return (x1 - X1Domain[0]) / (X1Domain[1] - X1Domain[0]);
+        }
+
+        double NormalizeX2(double x2)
+        {
+            return (x2 - X2Domain[0]) / (X2Domain[1] - X2Domain[0]);
+        }
+
+        double NormalizeY(double y)
+        {
+            return (y - YRange[0]) / (YRange[1] - YRange[0]);
+        }
+
+        double GetYFromNormalized(double yNormalized)
+        {
+            return yNormalized * (YRange[1] - YRange[0]) + YRange[0];
         }
 
         private void GoRandomizeB_Click(object sender, RoutedEventArgs e)
@@ -283,6 +379,61 @@ namespace FunctionNeuralNetwork
                 {
                     MessageBox.Show("The file has incorrect format", "Loading weights", MessageBoxButton.OK);
                 }
+            }
+        }
+
+        private void GoRefreshB_Click(object sender, RoutedEventArgs e)
+        {
+            VisualizeFunction(RendererEnum.Both);
+        }
+
+        private void DomainValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            double x1Min = (double)goX1minIUP.Value;
+            double x1Max = (double)goX1maxIUP.Value;
+            double x2Min = (double)goX2minIUP.Value;
+            double x2Max = (double)goX2maxIUP.Value;
+            double yMin = (double)goYminIUP.Value;
+            double yMax = (double)goYmaxIUP.Value;
+
+            BrushConverter converter = new BrushConverter();
+            if (x1Min >= x1Max)
+            {
+                goX1minIUP.BorderBrush = Brushes.Red;
+                goX1maxIUP.BorderBrush = Brushes.Red;
+            }
+            else
+            {
+                goX1minIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                goX1maxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                X1Domain[0] = x1Min;
+                X1Domain[1] = x1Max;
+            }
+                
+            if (x2Min >= x2Max)
+            {
+                goX2minIUP.BorderBrush = Brushes.Red;
+                goX2maxIUP.BorderBrush = Brushes.Red;
+            }
+            else
+            {
+                goX2minIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                goX2maxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                X2Domain[0] = x2Min;
+                X2Domain[1] = x2Max;
+            }
+
+            if(yMin >= yMax)
+            {
+                goYminIUP.BorderBrush = Brushes.Red;
+                goYmaxIUP.BorderBrush = Brushes.Red;
+            }
+            else
+            {
+                goYminIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                goYmaxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                YRange[0] = yMin;
+                YRange[1] = yMax;
             }
         }
     }
