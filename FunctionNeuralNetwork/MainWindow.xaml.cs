@@ -40,6 +40,7 @@ namespace FunctionNeuralNetwork
         public MainWindow()
         {
             InitializeComponent();
+            this.Closed += MainWindow_Closed;
             random = new Random();
             NeuralNetwork = new NeuralNetwork();
             FunctionViewer = new FunctionViewer(goFuncHost, this);
@@ -51,7 +52,9 @@ namespace FunctionNeuralNetwork
 
             //Adding functions
             gsFunctionDefinitions = new List<FunctionDefinition>();
-            gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, "y=sin(x1+x2)"));
+            gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.Gaussian, new int[2] {-4, 4 }, new int[2] { -4, 4}, new int[2] {0,1 }, "y=exp(-(x1^2 + x2^2)/8)"));
+            gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, new int[2] { -2, 2 }, new int[2] { -2, 2 }, new int[2] { -1, 1 }, "y=sin(x1+x2)"));
+            
 
             for (int i = 0; i < gsFunctionDefinitions.Count; i++)
                 goFunctionComboBox.Items.Add(gsFunctionDefinitions[i].Label);
@@ -63,15 +66,32 @@ namespace FunctionNeuralNetwork
             goWorker.DoWork += ExecuteLearning;
             goWorker.RunWorkerCompleted += GoWorker_RunWorkerCompleted;
 
+            goFunctionComboBox.SelectionChanged += GoFunctionComboBox_SelectionChanged;
             goSyncCB.Checked += GoSyncCB_Checked;
             goSyncCB.Unchecked += GoSyncCB_Checked;
-
             goX1minIUP.ValueChanged += DomainValueChanged;
             goX1maxIUP.ValueChanged += DomainValueChanged;
             goX2minIUP.ValueChanged += DomainValueChanged;
             goX2maxIUP.ValueChanged += DomainValueChanged;
             goYminIUP.ValueChanged += DomainValueChanged;
             goYmaxIUP.ValueChanged += DomainValueChanged;
+        }
+
+        private void GoFunctionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            goX1minIUP.Value = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex].DefaultX1Domain[0];
+            goX1maxIUP.Value = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex].DefaultX1Domain[1];
+            goX2minIUP.Value = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex].DefaultX2Domain[0];
+            goX2maxIUP.Value = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex].DefaultX2Domain[1];
+            goYminIUP.Value = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex].DefaultYRange[0];
+            goYmaxIUP.Value = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex].DefaultYRange[1];
+
+            VisualizeFunction(RendererEnum.Both);
+        }
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            Application.Current.Shutdown();
         }
 
         private void GoSyncCB_Checked(object sender, RoutedEventArgs e)
@@ -214,7 +234,12 @@ namespace FunctionNeuralNetwork
                 MessageBox.Show("Invalid function domain", "Parameters error", MessageBoxButton.OK);
                 return;
             }
-            
+            if (goYminIUP.Value >= goYmaxIUP.Value)
+            {
+                MessageBox.Show("Invalid function range", "Parameters error", MessageBoxButton.OK);
+                return;
+            }
+
             GradientFactor factor = GradientFactor.n;;
             switch(goGradientFactorComboBox.SelectedIndex)
             {

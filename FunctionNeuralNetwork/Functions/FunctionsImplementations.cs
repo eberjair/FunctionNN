@@ -12,5 +12,10 @@ namespace FunctionNeuralNetwork.Functions
         {
             return Math.Sin(x1 + x2);
         }
+
+        public static double Gaussian(double x1, double x2)
+        {
+            return Math.Exp(-((x1 * x1 + x2 * x2) / (8)));
+        }
     }
 }

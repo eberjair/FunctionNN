@@ -59,10 +59,13 @@ namespace FunctionNeuralNetwork
         vtkOrientationMarkerWidget goOrientationFunction;
         vtkOrientationMarkerWidget goOrientationNN;
 
+
         public bool gbRenderized;
+        bool gbSync;
 
         public bool Synchronized
         {
+            get { return gbSync; }
             set
             {
                 if (value)
@@ -94,6 +97,7 @@ namespace FunctionNeuralNetwork
                     goOrientationNN.InteractiveOff();
 
                 }
+                gbSync = value;
                 goInteractor.Render();
             }
         }
@@ -141,6 +145,7 @@ namespace FunctionNeuralNetwork
             goRendererNN.SetActiveCamera(goCamera);
 
             gbRenderized = false;
+            gbSync = true;
             goRenderWindowControl.Load += GoRenderWindowControlLoad;
         }
 
@@ -151,6 +156,7 @@ namespace FunctionNeuralNetwork
             {
                 goRendererFunction.SetBackground(0.1, 0.1, 0.1);
                 goVTKWindow = goRenderWindowControl.RenderWindow;
+
                 goInteractor.SetRenderWindow(goVTKWindow);
                 goRendererFunction.SetViewport(0.0, 0.0, 0.499, 1.0);
                 goVTKWindow.AddRenderer(goRendererFunction);
@@ -158,6 +164,8 @@ namespace FunctionNeuralNetwork
                 goRendererNN.SetBackground(0.1, 0.1, 0.1);
                 goRendererNN.SetViewport(0.501, 0.0, 1, 1);
                 goVTKWindow.AddRenderer(goRendererNN);
+
+                goCamera.SetClippingRange(0.1, 10000);
 
                 goInteractor.Initialize();
                 InitializeVisualizationObjects();
@@ -231,6 +239,18 @@ namespace FunctionNeuralNetwork
             goOrientationFunction.SetEnabled(1);
 
             goOrientationFunction.InteractiveOff();
+
+            vtkTextActor functionTitle = new vtkTextActor();
+            functionTitle.SetInput("Function to learn");
+            functionTitle.SetTextScaleModeToViewport();
+            functionTitle.GetProperty().SetColor(0.9, 0.9, 0.9);
+            goRendererFunction.AddActor(functionTitle);
+
+            vtkTextActor neuralNetworkTitle = new vtkTextActor();
+            neuralNetworkTitle.SetInput("NN calculations");
+            neuralNetworkTitle.SetTextScaleModeToViewport();
+            neuralNetworkTitle.GetProperty().SetColor(0.9, 0.9, 0.9);
+            goRendererNN.AddActor(neuralNetworkTitle);
         }
 
         public void VisualizeData(double[] bounds, double[,] data, RendererEnum rendererToUse)
@@ -265,9 +285,18 @@ namespace FunctionNeuralNetwork
                 }
             }
             if (rendererToUse == RendererEnum.Function)
+            {
                 goRendererFunction.ResetCamera();
+                if(Synchronized)
+                    goRendererNN.ResetCamera();
+            }
             else
+            {
                 goRendererNN.ResetCamera();
+                if(Synchronized)
+                    goRendererFunction.ResetCamera();
+            }
+                
             
             goInteractor.Render();
         }

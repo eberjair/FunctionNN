@@ -137,32 +137,32 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <xctk:IntegerUpDown Name="goX1minIUP" Margin="10,3,5,3" Value="-2" />
-                            <xctk:IntegerUpDown Name="goX1maxIUP" Grid.Column="1" Margin="5,3,10,3" Value="2" />
+                            <xctk:IntegerUpDown Name="goX1minIUP" Margin="8,3,7,3" Value="-4" />
+                            <xctk:IntegerUpDown Name="goX1maxIUP" Grid.Column="1" Margin="5,3,10,3" Value="4" />
                         </Grid>
                         <Grid Grid.Row="2" Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <xctk:IntegerUpDown Name="goX2minIUP" Margin="10,3,5,3" Value="-2" />
-                            <xctk:IntegerUpDown Name="goX2maxIUP" Grid.Column="1" Margin="5,3,10,3" Value="2" />
+                            <xctk:IntegerUpDown Name="goX2minIUP" Margin="10,3,5,3" Value="-4" />
+                            <xctk:IntegerUpDown Name="goX2maxIUP" Grid.Column="1" Margin="5,3,10,3" Value="4" />
                         </Grid>
                         <Grid Grid.Row="3" Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <xctk:IntegerUpDown Name="goYminIUP" Margin="10,3,5,3" Value="-1"/>
+                            <xctk:IntegerUpDown Name="goYminIUP" Margin="10,3,5,3" Value="0"/>
                             <xctk:IntegerUpDown Name="goYmaxIUP" Grid.Column="1" Margin="5,3,10,3" Value="1"/>
                         </Grid>
                         
                         <xctk:IntegerUpDown Name="goIterationsUpDown" Grid.Column="1" Grid.Row="4" Margin="10,16" Minimum="50" Maximum="10000000" Value="1000"/>
                         
                         <ComboBox Margin="10,3" Grid.Column="1" Grid.Row="5" Name="goGradientFactorComboBox" HorizontalContentAlignment="Right" VerticalContentAlignment="Center">
-                            <ComboBoxItem IsSelected="True" Content="0.1/n"/>
+                            <ComboBoxItem Content="0.1/n"/>
                             <ComboBoxItem Content="0.1/ln(n+1)"/>
-                            <ComboBoxItem Content="0.1"/>
+                            <ComboBoxItem Content="0.1" IsSelected="True"/>
                             <ComboBoxItem Content="0.01"/>
                         </ComboBox>
 
