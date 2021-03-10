@@ -241,13 +241,13 @@ namespace FunctionNeuralNetwork
             goOrientationFunction.InteractiveOff();
 
             vtkTextActor functionTitle = new vtkTextActor();
-            functionTitle.SetInput("Function to learn");
+            functionTitle.SetInput("Function To Learn");
             functionTitle.SetTextScaleModeToViewport();
             functionTitle.GetProperty().SetColor(0.9, 0.9, 0.9);
             goRendererFunction.AddActor(functionTitle);
 
             vtkTextActor neuralNetworkTitle = new vtkTextActor();
-            neuralNetworkTitle.SetInput("NN calculations");
+            neuralNetworkTitle.SetInput("Neural Network Calculations");
             neuralNetworkTitle.SetTextScaleModeToViewport();
             neuralNetworkTitle.GetProperty().SetColor(0.9, 0.9, 0.9);
             goRendererNN.AddActor(neuralNetworkTitle);

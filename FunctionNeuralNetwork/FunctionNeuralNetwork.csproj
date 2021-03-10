@@ -104,12 +104,13 @@
     <Compile Include="Functions\FunctionDefinition.cs" />
     <Compile Include="Functions\FunctionsImplementations.cs" />
     <Compile Include="IntervalResult.cs" />
+    <Compile Include="ExecutionParameters.cs" />
     <Compile Include="Viewers\AxonRenderer.cs" />
     <Compile Include="Viewers\FunctionViewer.xaml.cs">
       <DependentUpon>FunctionViewer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LearnArguments.cs" />
-    <Compile Include="LearnOptions.cs" />
+    <Compile Include="BackgroundArguments.cs" />
+    <Compile Include="LearningParameters.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

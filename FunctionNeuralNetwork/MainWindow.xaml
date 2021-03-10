@@ -125,9 +125,9 @@
                         <Label Content="X1 Domain:" Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <Label Content="X2 Domain:" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         <Label Content="Y Range:" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                        <Label Content="Iterations&#x0a;(50-10000):" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="4"/>
+                        <Label Content="Iterations&#x0a;(50-10000000):" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="4"/>
                         <Label Content="Grad factor:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="5"/>
-                        <Label Content="Interval&#x0a;visualization:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="6"/>
+                        <Label Content="Interval&#x0a;visualization:" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Row="6" HorizontalContentAlignment="Right"/>
 
                         <ComboBox Margin="10,3" Grid.Column="1" Name="goFunctionComboBox" HorizontalContentAlignment="Right" VerticalContentAlignment="Center">
 
@@ -182,19 +182,19 @@
                     </Grid.RowDefinitions>
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition />
+                            <RowDefinition Height="3*" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="130"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Number of executions:" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                        <xctk:IntegerUpDown Grid.Column="1"  Margin="10,5" Minimum="50" Maximum="10000" Value="1000" Name="goTestUpDown"/>
-                        <Label Content="Interval visualization:" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Right"/>
-                        <xctk:IntegerUpDown Name="goTestingIntervalVisualizationIUD" Grid.Column="1" Grid.Row="1" Margin="10,5" Minimum="0" Value="0"/>
+                        <Label Content="Number of executions&#x0a;(50-100000):" VerticalAlignment="Center" HorizontalAlignment="Right" HorizontalContentAlignment="Right"/>
+                        <xctk:IntegerUpDown Grid.Column="1"  Margin="10,5" Minimum="50" Maximum="100000" Value="1000" Name="goTestUpDown"/>
+                        <!--<Label Content="Interval visualization:" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Right"/>
+                        <xctk:IntegerUpDown Name="goTestingIntervalVisualizationIUD" Grid.Column="1" Grid.Row="1" Margin="10,5" Minimum="0" Value="0"/>-->
                     </Grid>
-                    <Button Grid.Row="1" Margin="40,5" Content="Execute" Name="goTestButton"/>
+                    <Button Grid.Row="1" Margin="40,5" Content="Execute" Name="goTestButton" Click="GoTestButton_Click"/>
                 </Grid>
             </GroupBox>
 

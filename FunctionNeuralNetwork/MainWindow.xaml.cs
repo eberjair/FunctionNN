@@ -25,7 +25,8 @@ namespace FunctionNeuralNetwork
     public partial class MainWindow : Window
     {
         NeuralNetwork NeuralNetwork;
-        BackgroundWorker goWorker;
+        BackgroundWorker goLearningWorker;
+        BackgroundWorker goTestingWorker;
         List<FunctionDefinition> gsFunctionDefinitions;
         ProgressWindow progressWindow;
         FunctionViewer FunctionViewer;
@@ -62,9 +63,13 @@ namespace FunctionNeuralNetwork
 
             PrintWeights();
 
-            goWorker = new BackgroundWorker { WorkerReportsProgress = true };
-            goWorker.DoWork += ExecuteLearning;
-            goWorker.RunWorkerCompleted += GoWorker_RunWorkerCompleted;
+            goLearningWorker = new BackgroundWorker { WorkerReportsProgress = true };
+            goLearningWorker.DoWork += ExecuteLearning;
+            goLearningWorker.RunWorkerCompleted += GoWorker_RunWorkerCompleted;
+
+            goTestingWorker = new BackgroundWorker { WorkerReportsProgress = true };
+            goTestingWorker.DoWork += GoTestingWorker_DoWork;
+            goTestingWorker.RunWorkerCompleted += GoWorker_RunWorkerCompleted;
 
             goFunctionComboBox.SelectionChanged += GoFunctionComboBox_SelectionChanged;
             goSyncCB.Checked += GoSyncCB_Checked;
@@ -75,6 +80,38 @@ namespace FunctionNeuralNetwork
             goX2maxIUP.ValueChanged += DomainValueChanged;
             goYminIUP.ValueChanged += DomainValueChanged;
             goYmaxIUP.ValueChanged += DomainValueChanged;
+        }
+
+        
+        private void GoTestingWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker loWorker = sender as BackgroundWorker;
+            BackgroundArguments arguments = e.Argument as BackgroundArguments;
+            ExecutionParameters options = arguments.ExecutionOptions;
+            NeuralNetwork neuralNetwork = arguments.NeuralNetwork;
+            FunctionDefinition functionDefinition = arguments.ExecutionOptions.FunctionDefinition;
+            int iterations = options.Iterations;
+            double s3 = 0;
+            double[] lsError = new double[iterations];
+            int porcentage = 0;
+            for (int i = 0;  i < iterations; i++)
+            {
+                double[] x1 = GenerateX1();
+                double[] x2 = GenerateX2();
+                double y = functionDefinition.Evaluate(x1[1], x2[1]);
+                double yNormalized = NormalizeY(y);
+                s3 = neuralNetwork.CalculateS3(x1[0], x2[0]);
+                lsError[i] = Math.Abs(s3 - yNormalized);
+                int newPorcentage = 100 * i / iterations;
+                if ( newPorcentage > porcentage)
+                {
+                    loWorker.ReportProgress(newPorcentage);
+                    porcentage = newPorcentage;
+                }
+                    
+            }
+            IntervalResult intervalResult = new IntervalResult(true, lsError);
+            e.Result = intervalResult;
         }
 
         private void GoFunctionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -188,7 +225,6 @@ namespace FunctionNeuralNetwork
 
         private void GoWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            //goResultsTextBox.Text = (string)e.Result;
             IntervalResult intervalResult = e.Result as IntervalResult;
             double[] lsIntervalResults = intervalResult.IterationsError;
             
@@ -258,19 +294,19 @@ namespace FunctionNeuralNetwork
                 if (boxResult == MessageBoxResult.No) return;
             }
 
-            progressWindow = new ProgressWindow(goWorker);
+            progressWindow = new ProgressWindow(goLearningWorker);
             FunctionDefinition function = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex];
             gsErrorResults = new double[iterations];
             gnNextResultsIndex = 0;
             for (int currentIterations = 0; currentIterations< iterations; )
             {
-                LearnOptions learnOptions = new LearnOptions(factor, currentIterations, iterations, interval, function);
-                LearnArguments learnArguments = new LearnArguments(learnOptions, NeuralNetwork);
-                goWorker.RunWorkerAsync(argument: learnArguments);
+                LearningParameters learnOptions = new LearningParameters(factor, currentIterations, iterations, interval, function);
+                BackgroundArguments learnArguments = new BackgroundArguments(learnOptions, NeuralNetwork);
+                goLearningWorker.RunWorkerAsync(argument: learnArguments);
                 progressWindow.ShowDialog();
                 currentIterations += interval;
                 UpdateUIWeights();
-                progressWindow = new ProgressWindow(goWorker);
+                progressWindow = new ProgressWindow(goLearningWorker);
                 if (currentIterations < iterations)
                     MessageBox.Show("Interval executed", "Learning Process", MessageBoxButton.OK);
             }
@@ -280,14 +316,14 @@ namespace FunctionNeuralNetwork
         void ExecuteLearning(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker loWorker = sender as BackgroundWorker;
-            LearnArguments arguments = e.Argument as LearnArguments;
-            LearnOptions options = arguments.LearnOptions;
+            BackgroundArguments arguments = e.Argument as BackgroundArguments;
+            ExecutionParameters options = arguments.ExecutionOptions;
             NeuralNetwork neuralNetwork = arguments.NeuralNetwork;
-            FunctionDefinition functionDefinition = arguments.LearnOptions.FunctionDefinition;
+            FunctionDefinition functionDefinition = arguments.ExecutionOptions.FunctionDefinition;
             int iterations = options.Iterations;
-            int interval = options.Interval;
-            int currentIterarions = options.CurrentIterations;
-            GradientFactor gradientFactor = options.GradientFactor;
+            int interval = (options as LearningParameters).Interval;
+            int currentIterarions = (options as LearningParameters).CurrentIterations;
+            GradientFactor gradientFactor = (options as LearningParameters).GradientFactor;
             double lnEta = 0.1;
             double s3 = 0;
             double[] lsError = new double[Math.Min(interval, iterations-currentIterarions)];
@@ -460,6 +496,34 @@ namespace FunctionNeuralNetwork
                 YRange[0] = yMin;
                 YRange[1] = yMax;
             }
+        }
+
+        private void GoTestButton_Click(object sender, RoutedEventArgs e)
+        {
+            double x1Min = (double)goX1minIUP.Value;
+            double x1Max = (double)goX1maxIUP.Value;
+            double x2Min = (double)goX2minIUP.Value;
+            double x2Max = (double)goX2maxIUP.Value;
+            if (x1Min >= x1Max || x2Min >= x2Max)
+            {
+                MessageBox.Show("Invalid function domain", "Parameters error", MessageBoxButton.OK);
+                return;
+            }
+            if (goYminIUP.Value >= goYmaxIUP.Value)
+            {
+                MessageBox.Show("Invalid function range", "Parameters error", MessageBoxButton.OK);
+                return;
+            }
+
+            int iterations = (int)goTestUpDown.Value;
+            gnNextResultsIndex = 0;
+            progressWindow = new ProgressWindow(goTestingWorker) { Title="Testing Neural Network"};
+            FunctionDefinition function = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex];
+            gsErrorResults = new double[iterations];
+            ExecutionParameters testingParameters = new ExecutionParameters(iterations, function);
+            BackgroundArguments backgroundArguments = new BackgroundArguments(testingParameters, NeuralNetwork);
+            goTestingWorker.RunWorkerAsync(argument: backgroundArguments);
+            progressWindow.ShowDialog();
         }
     }
 

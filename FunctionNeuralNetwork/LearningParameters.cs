@@ -8,25 +8,19 @@ using FunctionNeuralNetwork.Functions;
 
 namespace FunctionNeuralNetwork
 {
-    public enum LearnMethod { MaxDescend, FletcherReeves }
     public enum GradientFactor { n, ln, c1, c2 }
-    public class LearnOptions
+    public class LearningParameters : ExecutionParameters
     {
         public GradientFactor GradientFactor { get;  }
-        public int Iterations { get; }
         public int CurrentIterations { get; }
-
         public int Interval { get; }
-        public FunctionDefinition FunctionDefinition { get; }
         
-
-        public LearnOptions(GradientFactor factor, int currentIterations, int iterations, int interval, FunctionDefinition functionDefinition)
+        public LearningParameters(GradientFactor factor, int currentIterations, int iterations, int interval, FunctionDefinition functionDefinition):
+            base(iterations, functionDefinition)
         {
             GradientFactor = factor;
-            Iterations = iterations;
-            Interval = interval;
             CurrentIterations = currentIterations;
-            FunctionDefinition = functionDefinition;
+            Interval = interval;
         }
     }
 }

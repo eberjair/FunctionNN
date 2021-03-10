@@ -7,16 +7,16 @@ using System.Windows.Controls;
 
 namespace FunctionNeuralNetwork
 {
-    public class LearnArguments
+    public class BackgroundArguments
     {
-        public LearnOptions LearnOptions { get; }
+        public ExecutionParameters ExecutionOptions { get; }
         
         public NeuralNetwork NeuralNetwork { get; }
         
 
-        public LearnArguments(LearnOptions learnOptions, NeuralNetwork neuralNetwork)
+        public BackgroundArguments(ExecutionParameters executionOptions, NeuralNetwork neuralNetwork)
         {
-            LearnOptions = learnOptions;
+            ExecutionOptions = executionOptions;
             NeuralNetwork = neuralNetwork;
         }
     }
