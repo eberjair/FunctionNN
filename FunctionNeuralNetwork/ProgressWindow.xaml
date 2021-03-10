@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FunctionNeuralNetwork"
         mc:Ignorable="d"
-        Title="Learning Progress" Height="100" Width="500" MinHeight="100" MaxHeight="100"  MinWidth="500" MaxWidth="500" >
+        Title="Learning Progress" Height="100" Width="500" MinHeight="100" MaxHeight="100"  MinWidth="500" MaxWidth="500" Icon="icon.png">
     <Grid>
         <ProgressBar Margin="30, 15" Name="goPB"/>
     </Grid>
