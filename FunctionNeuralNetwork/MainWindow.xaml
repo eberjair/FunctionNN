@@ -160,8 +160,8 @@
                         <xctk:IntegerUpDown Name="goIterationsUpDown" Grid.Column="1" Grid.Row="4" Margin="10,16" Minimum="50" Maximum="10000000" Value="1000"/>
                         
                         <ComboBox Margin="10,3" Grid.Column="1" Grid.Row="5" Name="goGradientFactorComboBox" HorizontalContentAlignment="Right" VerticalContentAlignment="Center">
-                            <ComboBoxItem Content="0.1/n"/>
-                            <ComboBoxItem Content="0.1/ln(n+1)"/>
+                            <ComboBoxItem Content="0.1/t"/>
+                            <ComboBoxItem Content="0.1/ln(t+1)"/>
                             <ComboBoxItem Content="0.1" IsSelected="True"/>
                             <ComboBoxItem Content="0.01"/>
                         </ComboBox>
