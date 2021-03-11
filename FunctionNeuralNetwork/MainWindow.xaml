@@ -7,7 +7,7 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:local="clr-namespace:FunctionNeuralNetwork"
         mc:Ignorable="d"
-        Title="Sample Neural Network" Height="450" Width="1100" MinHeight="450" MinWidth="1100" Icon="icon.png">
+        Title="Function Neural Network" Height="450" Width="1100" MinHeight="450" MinWidth="1100" Icon="icon.png">
     <Window.DataContext>
         <local:ChartModel/>
     </Window.DataContext>
@@ -80,7 +80,7 @@
 
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
+                            <ColumnDefinition  Width="1.1*"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
@@ -89,9 +89,9 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Label Content="Sync visualization" VerticalAlignment="Center"/>
-                        <Label Content="X1 Intervals (10-200)" Grid.Row="1" VerticalAlignment="Center"/>
-                        <Label Content="X2 Intervals (10-200)" Grid.Row="2" VerticalAlignment="Center"/>
-                        <CheckBox Name="goSyncCB" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,5" Width="119" IsChecked="True"/>
+                        <Label Content="X1 Intervals (10-200):" Grid.Row="1" VerticalAlignment="Center"/>
+                        <Label Content="X2 Intervals (10-200):" Grid.Row="2" VerticalAlignment="Center"/>
+                        <CheckBox Name="goSyncCB" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,5"  IsChecked="True"/>
                         <xctk:IntegerUpDown Name="goX1IntervalsIUD" Grid.Column="1" Grid.Row="1" Margin="10,3" Minimum="10" Maximum="200" Value="20"/>
                         <xctk:IntegerUpDown Name="goX2IntervalsIUD" Grid.Column="1" Grid.Row="2" Margin="10,3" Minimum="10" Maximum="200" Value="20"/>
                     </Grid>
@@ -118,7 +118,7 @@
                             <RowDefinition Height="2*"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="90"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Content="Function:" HorizontalAlignment="Right" VerticalAlignment="Center"/>
@@ -182,7 +182,7 @@
                     </Grid.RowDefinitions>
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="3*" />
+                            <RowDefinition Height="2*" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
