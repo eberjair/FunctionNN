@@ -54,7 +54,8 @@ namespace FunctionNeuralNetwork
             //Adding functions
             gsFunctionDefinitions = new List<FunctionDefinition>();
             gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.Gaussian, new int[2] {-4, 4 }, new int[2] { -4, 4}, new int[2] {0,1 }, "y=exp(-(x1^2 + x2^2)/8)"));
-            gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumX1X2, new int[2] { -2, 2 }, new int[2] { -2, 2 }, new int[2] { -1, 1 }, "y=sin(x1+x2)"));
+            gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumAbsX1X2, new int[2] { -4, 4 }, new int[2] { -4, 4 }, new int[2] { -1, 1 }, "y=sin(|x1|+|x2|)"));
+            gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinProductX1X2, new int[2] { -2, 2 }, new int[2] { -2, 2 }, new int[2] { -1, 1 }, "y=sin(x1*x2)"));
             
 
             for (int i = 0; i < gsFunctionDefinitions.Count; i++)

@@ -171,7 +171,7 @@ namespace FunctionNeuralNetwork
             scalarBarActor.SetLookupTable(lookupTable);
             scalarBarActor.SetTitle("Weights");
             scalarBarActor.GetPositionCoordinate().SetCoordinateSystemToNormalizedViewport();
-            scalarBarActor.GetPositionCoordinate().SetValue(0.2, 0.01);
+            scalarBarActor.GetPositionCoordinate().SetValue(0.2, 0.05);
             scalarBarActor.SetOrientationToHorizontal();
             scalarBarActor.SetWidth(0.6);
             scalarBarActor.SetHeight(0.1);
@@ -212,6 +212,12 @@ namespace FunctionNeuralNetwork
                 double[] color = i<80? lookupTable.GetColor(NeuralNetwork.Wj[i]): lookupTable.GetColor(NeuralNetwork.B3);
                 axon.SetColor(color[0], color[1], color[2]);
             }
+
+            vtkTextActor viewerTitle = new vtkTextActor();
+            viewerTitle.SetInput("Neural Network Viewer");
+            viewerTitle.SetTextScaleModeToViewport();
+            viewerTitle.GetProperty().SetColor(0.9, 0.9, 0.9);
+            goRenderer.AddActor(viewerTitle);
         }
 
         public void UpdateAxonsColor()
