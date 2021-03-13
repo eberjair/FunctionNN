@@ -137,26 +137,35 @@ namespace FunctionNeuralNetwork
             FunctionViewer.Synchronized = (bool)goSyncCB.IsChecked;
         }
 
+        
         void PrintWeights()
         {
-            goWeightsTB.Text = "";
+            goWeightNamesPanel.Children.Add(new Label() {Content="b3"});
             
-            for(int j=0; j<80; j++)
-            {
-                for(int i=0; i<20; i++)
-                {
-                    goWeightsTB.Text += "wij"+ i +", "+ j + ":    " + NeuralNetwork.Wij[i,j] + "\n";
-                }
-            }
-            for (int j = 0; j < 80; j++)
-            {
-                goWeightsTB.Text += "bj" + j + ":    " + NeuralNetwork.Bj[j] + "\n";
-            }
-            for (int j=0; j<80;j++)
-            {
-                goWeightsTB.Text += "wj" + j + ":    " + NeuralNetwork.Wj[j] + "\n";
-            }
-            goWeightsTB.Text += "b3:    " + NeuralNetwork.B3 + "\n";
+
+            //goWeightsTB.Text = "";
+            
+            //for(int j=0; j<80; j++)
+            //{
+            //    for(int i=0; i<20; i++)
+            //    {
+            //        goWeightsTB.Text += "wij"+ i +", "+ j + ":    " + NeuralNetwork.Wij[i,j] + "\n";
+            //    }
+            //}
+            //for (int j = 0; j < 80; j++)
+            //{
+            //    goWeightsTB.Text += "bj" + j + ":    " + NeuralNetwork.Bj[j] + "\n";
+            //}
+            //for (int j=0; j<80;j++)
+            //{
+            //    goWeightsTB.Text += "wj" + j + ":    " + NeuralNetwork.Wj[j] + "\n";
+            //}
+            //goWeightsTB.Text += "b3:    " + NeuralNetwork.B3 + "\n";
+
+        }
+
+        void UpdateWeightSliders()
+        {
 
         }
 
@@ -402,7 +411,7 @@ namespace FunctionNeuralNetwork
 
         private void UpdateUIWeights()
         {
-            PrintWeights();
+            UpdateWeightSliders();
             VisualizeFunction(RendererEnum.NeuralNetwork);
             NNViewer.UpdateAxonsColor();
         }

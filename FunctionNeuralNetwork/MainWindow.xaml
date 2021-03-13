@@ -54,7 +54,16 @@
 
                     <Label Content="Current weights:" VerticalAlignment="Center"/>
                     <ScrollViewer Grid.Row="1">
-                        <TextBlock Name="goWeightsTB" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition Width="4*"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Name="goWeightNamesPanel"/>
+                            <StackPanel Grid.Column="1" Name="goWeightSlidersPanel"/>
+                            <StackPanel Grid.Column="2" Name="goWeigghtValuesPanel"/>
+                        </Grid>
                     </ScrollViewer>
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
