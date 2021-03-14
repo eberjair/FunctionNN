@@ -56,9 +56,9 @@
                     <ScrollViewer Grid.Row="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition/>
-                                <ColumnDefinition Width="4*"/>
-                                <ColumnDefinition/>
+                                <ColumnDefinition Width="6*"/>
+                                <ColumnDefinition Width="12*"/>
+                                <ColumnDefinition Width="3*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Name="goWeightNamesPanel"/>
                             <StackPanel Grid.Column="1" Name="goWeightSlidersPanel"/>

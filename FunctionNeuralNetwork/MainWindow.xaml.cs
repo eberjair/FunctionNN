@@ -62,7 +62,7 @@ namespace FunctionNeuralNetwork
                 goFunctionComboBox.Items.Add(gsFunctionDefinitions[i].Label);
             goFunctionComboBox.SelectedIndex = 0;
 
-            PrintWeights();
+            PrintWeightsUIElements();
 
             goLearningWorker = new BackgroundWorker { WorkerReportsProgress = true };
             goLearningWorker.DoWork += ExecuteLearning;
@@ -137,30 +137,48 @@ namespace FunctionNeuralNetwork
             FunctionViewer.Synchronized = (bool)goSyncCB.IsChecked;
         }
 
-        
-        void PrintWeights()
+        void PrintWeightsUIElements()
         {
-            goWeightNamesPanel.Children.Add(new Label() {Content="b3"});
-            
+            goWeightNamesPanel.Children.Add(new Label() {Content="b3", Height=25, VerticalContentAlignment=VerticalAlignment.Center});
+            Slider b3Slider = new Slider() { Minimum=-1, Maximum=1 , Height = 25, VerticalContentAlignment = VerticalAlignment.Center };
+            b3Slider.ValueChanged += WeightSlider_ValueChanged;
+            goWeightSlidersPanel.Children.Add(b3Slider);
+            goWeigghtValuesPanel.Children.Add(new Label() { Content = "0" , Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
 
-            //goWeightsTB.Text = "";
+            for(int j=0; j<80; j++)
+            {
+                goWeightNamesPanel.Children.Add(new Label() { Content = "wj " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                Slider wj = new Slider() { Minimum = -1, Maximum = 1, Height = 25, VerticalContentAlignment = VerticalAlignment.Center };
+                wj.ValueChanged += WeightSlider_ValueChanged;
+                goWeightSlidersPanel.Children.Add(wj);
+                goWeigghtValuesPanel.Children.Add(new Label() { Content = "0", Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+            }
             
-            //for(int j=0; j<80; j++)
-            //{
-            //    for(int i=0; i<20; i++)
-            //    {
-            //        goWeightsTB.Text += "wij"+ i +", "+ j + ":    " + NeuralNetwork.Wij[i,j] + "\n";
-            //    }
-            //}
-            //for (int j = 0; j < 80; j++)
-            //{
-            //    goWeightsTB.Text += "bj" + j + ":    " + NeuralNetwork.Bj[j] + "\n";
-            //}
-            //for (int j=0; j<80;j++)
-            //{
-            //    goWeightsTB.Text += "wj" + j + ":    " + NeuralNetwork.Wj[j] + "\n";
-            //}
-            //goWeightsTB.Text += "b3:    " + NeuralNetwork.B3 + "\n";
+            for(int j=0; j<80; j++)
+            {
+                goWeightNamesPanel.Children.Add(new Label() { Content = "bj " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                Slider bj = new Slider() { Minimum = -1, Maximum = 1, Height = 25, VerticalContentAlignment = VerticalAlignment.Center };
+                bj.ValueChanged += WeightSlider_ValueChanged;
+                goWeightSlidersPanel.Children.Add(bj);
+                goWeigghtValuesPanel.Children.Add(new Label() { Content = "0", Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+            }
+
+            for(int j=0; j<80; j++)
+            {
+                for(int i=0; i<20; i++)
+                {
+                    goWeightNamesPanel.Children.Add(new Label() { Content = "wij " + (i + 1) + ", " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                    Slider wij = new Slider() { Minimum = -1, Maximum = 1, Height = 25, VerticalContentAlignment = VerticalAlignment.Center };
+                    wij.ValueChanged += WeightSlider_ValueChanged;
+                    goWeightSlidersPanel.Children.Add(wij);
+                    goWeigghtValuesPanel.Children.Add(new Label() { Content = "0", Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                }
+            }
+        }
+
+        private void WeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Slider slider = sender as Slider;
 
         }
 
