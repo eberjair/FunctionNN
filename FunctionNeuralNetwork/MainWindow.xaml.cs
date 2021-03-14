@@ -140,27 +140,30 @@ namespace FunctionNeuralNetwork
         void PrintWeightsUIElements()
         {
             goWeightNamesPanel.Children.Add(new Label() {Content="b3", Height=25, VerticalContentAlignment=VerticalAlignment.Center});
-            Slider b3Slider = new Slider() { Minimum=-1, Maximum=1 , Height = 25, VerticalContentAlignment = VerticalAlignment.Center };
+            Slider b3Slider = new Slider() { Minimum=-1, Maximum=1 , Height = 25,
+                VerticalContentAlignment = VerticalAlignment.Center, Value=NeuralNetwork.B3 };
             b3Slider.ValueChanged += WeightSlider_ValueChanged;
             goWeightSlidersPanel.Children.Add(b3Slider);
-            goWeigghtValuesPanel.Children.Add(new Label() { Content = "0" , Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+            goWeigghtValuesPanel.Children.Add(new Label() { Content = NeuralNetwork.B3.ToString() , Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
 
             for(int j=0; j<80; j++)
             {
                 goWeightNamesPanel.Children.Add(new Label() { Content = "wj " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
-                Slider wj = new Slider() { Minimum = -1, Maximum = 1, Height = 25, VerticalContentAlignment = VerticalAlignment.Center };
+                Slider wj = new Slider() { Minimum = -1, Maximum = 1, Height = 25,
+                    VerticalContentAlignment = VerticalAlignment.Center, Value =NeuralNetwork.Wj[j] };
                 wj.ValueChanged += WeightSlider_ValueChanged;
                 goWeightSlidersPanel.Children.Add(wj);
-                goWeigghtValuesPanel.Children.Add(new Label() { Content = "0", Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                goWeigghtValuesPanel.Children.Add(new Label() { Content = NeuralNetwork.Wj[j].ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
             }
             
             for(int j=0; j<80; j++)
             {
                 goWeightNamesPanel.Children.Add(new Label() { Content = "bj " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
-                Slider bj = new Slider() { Minimum = -1, Maximum = 1, Height = 25, VerticalContentAlignment = VerticalAlignment.Center };
+                Slider bj = new Slider() { Minimum = -1, Maximum = 1, Height = 25,
+                    VerticalContentAlignment = VerticalAlignment.Center, Value = NeuralNetwork.Bj[j] };
                 bj.ValueChanged += WeightSlider_ValueChanged;
                 goWeightSlidersPanel.Children.Add(bj);
-                goWeigghtValuesPanel.Children.Add(new Label() { Content = "0", Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                goWeigghtValuesPanel.Children.Add(new Label() { Content = NeuralNetwork.Bj[j].ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
             }
 
             for(int j=0; j<80; j++)
@@ -168,10 +171,11 @@ namespace FunctionNeuralNetwork
                 for(int i=0; i<20; i++)
                 {
                     goWeightNamesPanel.Children.Add(new Label() { Content = "wij " + (i + 1) + ", " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
-                    Slider wij = new Slider() { Minimum = -1, Maximum = 1, Height = 25, VerticalContentAlignment = VerticalAlignment.Center };
+                    Slider wij = new Slider() { Minimum = -1, Maximum = 1, Height = 25,
+                        VerticalContentAlignment = VerticalAlignment.Center, Value = NeuralNetwork.Wij[i,j] };
                     wij.ValueChanged += WeightSlider_ValueChanged;
                     goWeightSlidersPanel.Children.Add(wij);
-                    goWeigghtValuesPanel.Children.Add(new Label() { Content = "0", Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                    goWeigghtValuesPanel.Children.Add(new Label() { Content = NeuralNetwork.Wij[i, j].ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
                 }
             }
         }
@@ -179,12 +183,57 @@ namespace FunctionNeuralNetwork
         private void WeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             Slider slider = sender as Slider;
-
+            int element = goWeightSlidersPanel.Children.IndexOf(slider);
+            if (element == 0)
+                NeuralNetwork.B3 = slider.Value;
+            else if (element < 81)
+                NeuralNetwork.Wj[element - 1] = slider.Value;
+            else if (element < 161)
+                NeuralNetwork.Bj[element - 81] = slider.Value;
+            else
+            {
+                element -= 161;
+                int j = element / 20;
+                int i = element % 20;
+                NeuralNetwork.Wij[i, j] = slider.Value;
+            }
+            (goWeigghtValuesPanel.Children[element] as Label).Content = slider.Value.ToString();
+            VisualizeFunction(RendererEnum.NeuralNetwork);
         }
 
         void UpdateWeightSliders()
         {
+            foreach(Slider slider in goWeightSlidersPanel.Children)
+                slider.ValueChanged -= WeightSlider_ValueChanged;
+            
+            int element = 1;
+            (goWeightSlidersPanel.Children[0] as Slider).Value = NeuralNetwork.B3;
+            (goWeigghtValuesPanel.Children[0] as Label).Content = NeuralNetwork.B3.ToString();
+       
+            for (int j = 0; j < 80; j++, element++)
+            {
+                (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wj[j];
+                (goWeigghtValuesPanel.Children[element] as Label).Content = NeuralNetwork.Wj[j].ToString();
+            }
 
+            for (int j = 0; j < 80; j++, element++)
+            {
+                (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Bj[j];
+                (goWeigghtValuesPanel.Children[element] as Label).Content = NeuralNetwork.Bj[j].ToString();
+            }
+
+            for (int j = 0; j < 80; j++)
+            {
+                for (int i = 0; i < 20; i++, element++)
+                {
+                    (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wij[i,j];
+                    (goWeigghtValuesPanel.Children[element] as Label).Content = NeuralNetwork.Wij[i,j].ToString();
+                }
+            }
+
+            foreach (Slider slider in goWeightSlidersPanel.Children)
+                slider.ValueChanged += WeightSlider_ValueChanged;
+            
         }
 
         public void VisualizeFunction(RendererEnum renderer)

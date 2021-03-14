@@ -7,14 +7,14 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:local="clr-namespace:FunctionNeuralNetwork"
         mc:Ignorable="d"
-        Title="Function Neural Network" Height="450" Width="1100" MinHeight="450" MinWidth="1100" Icon="icon.png">
+        Title="Function Neural Network" Height="450" Width="1100" MinHeight="450" MinWidth="1150" Icon="icon.png">
     <Window.DataContext>
         <local:ChartModel/>
     </Window.DataContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="500"/>
+            <ColumnDefinition Width="550"/>
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid.RowDefinitions>
@@ -40,8 +40,8 @@
                 <RowDefinition Height="120"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
             <GroupBox Header="Weights">
@@ -56,9 +56,9 @@
                     <ScrollViewer Grid.Row="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="6*"/>
+                                <ColumnDefinition Width="5*"/>
                                 <ColumnDefinition Width="12*"/>
-                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="4*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Name="goWeightNamesPanel"/>
                             <StackPanel Grid.Column="1" Name="goWeightSlidersPanel"/>

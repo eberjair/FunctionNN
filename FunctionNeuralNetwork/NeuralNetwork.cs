@@ -17,10 +17,10 @@ namespace FunctionNeuralNetwork
 
         double[] X;
         double[] S;
-        public double[] Bj { get; private set; }
-        public double[,] Wij { get; private set; }
-        public double B3 { get; private set; }
-        public double[] Wj { get; private set; }
+        public double[] Bj { get;  set; }
+        public double[,] Wij { get;  set; }
+        public double B3 { get;  set; }
+        public double[] Wj { get;  set; }
 
         double[] BjG;
         double[,] WijG;
