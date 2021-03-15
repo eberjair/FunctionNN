@@ -17,6 +17,8 @@ using FunctionNeuralNetwork.Viewers;
 
 namespace FunctionNeuralNetwork
 {
+
+    public enum AxonArray { b3, wj, bj, wij }
     /// <summary>
     /// Interaction logic for NNViewer.xaml
     /// </summary>
@@ -238,6 +240,30 @@ namespace FunctionNeuralNetwork
             }
             goInteractor.Render();
         }
-    
+
+        public void UpdateAxonColor(AxonArray array, int i, int j)
+        {
+            double[] color;
+            switch (array)
+            {
+                case AxonArray.b3:
+                    color = lookupTable.GetColor(NeuralNetwork.B3);
+                    gsS2S3Axons[80].SetColor(color[0], color[1], color[2]);
+                    break;
+                case AxonArray.bj:
+                    color = lookupTable.GetColor(NeuralNetwork.Bj[j]);
+                    gsS1S2Axons[20][j].SetColor(color[0], color[1], color[2]);
+                    break;
+                case AxonArray.wij:
+                    color = lookupTable.GetColor(NeuralNetwork.Wij[i, j]);
+                    gsS1S2Axons[i][j].SetColor(color[0], color[1], color[2]);
+                    break;
+                case AxonArray.wj:
+                    color = lookupTable.GetColor(NeuralNetwork.Wj[j]);
+                    gsS2S3Axons[j].SetColor(color[0], color[1], color[2]);
+                    break;
+            }
+            goInteractor.Render();
+        }
     }
 }

@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using System.ComponentModel;
+using System.Windows.Controls.Primitives;
 using FunctionNeuralNetwork.Functions;
 using Microsoft.Win32;
 
@@ -37,6 +38,8 @@ namespace FunctionNeuralNetwork
         double[] YRange;
         double[] gsErrorResults;
         int gnNextResultsIndex;
+
+        bool gbDragStarted = false;
 
         public MainWindow()
         {
@@ -62,7 +65,7 @@ namespace FunctionNeuralNetwork
                 goFunctionComboBox.Items.Add(gsFunctionDefinitions[i].Label);
             goFunctionComboBox.SelectedIndex = 0;
 
-            PrintWeightsUIElements();
+            
 
             goLearningWorker = new BackgroundWorker { WorkerReportsProgress = true };
             goLearningWorker.DoWork += ExecuteLearning;
@@ -81,9 +84,15 @@ namespace FunctionNeuralNetwork
             goX2maxIUP.ValueChanged += DomainValueChanged;
             goYminIUP.ValueChanged += DomainValueChanged;
             goYmaxIUP.ValueChanged += DomainValueChanged;
+
+            this.Loaded += MainWindow_Loaded;
         }
 
-        
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            PrintWeightsUIElements();
+        }
+
         private void GoTestingWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker loWorker = sender as BackgroundWorker;
@@ -136,34 +145,47 @@ namespace FunctionNeuralNetwork
         {
             FunctionViewer.Synchronized = (bool)goSyncCB.IsChecked;
         }
+        
+        Thumb GetThumb(Slider slider)
+        {
+            Track track = slider.Template.FindName("PART_Track", slider) as Track;
+            return track?.Thumb;
+        }
 
         void PrintWeightsUIElements()
         {
             goWeightNamesPanel.Children.Add(new Label() {Content="b3", Height=25, VerticalContentAlignment=VerticalAlignment.Center});
             Slider b3Slider = new Slider() { Minimum=-1, Maximum=1 , Height = 25,
-                VerticalContentAlignment = VerticalAlignment.Center, Value=NeuralNetwork.B3 };
+                VerticalContentAlignment = VerticalAlignment.Center, Value=NeuralNetwork.B3, SmallChange = 0.01 };
             b3Slider.ValueChanged += WeightSlider_ValueChanged;
+            b3Slider.Loaded += Slider_Loaded;
             goWeightSlidersPanel.Children.Add(b3Slider);
-            goWeigghtValuesPanel.Children.Add(new Label() { Content = NeuralNetwork.B3.ToString() , Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+            goWeigghtValuesPanel.Children.Add(new Label() { Content = Math.Round(NeuralNetwork.B3,3).ToString() , Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
 
             for(int j=0; j<80; j++)
             {
                 goWeightNamesPanel.Children.Add(new Label() { Content = "wj " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
                 Slider wj = new Slider() { Minimum = -1, Maximum = 1, Height = 25,
-                    VerticalContentAlignment = VerticalAlignment.Center, Value =NeuralNetwork.Wj[j] };
+                    VerticalContentAlignment = VerticalAlignment.Center, Value =NeuralNetwork.Wj[j],
+                    SmallChange = 0.01
+                };
                 wj.ValueChanged += WeightSlider_ValueChanged;
+                wj.Loaded += Slider_Loaded;
                 goWeightSlidersPanel.Children.Add(wj);
-                goWeigghtValuesPanel.Children.Add(new Label() { Content = NeuralNetwork.Wj[j].ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                goWeigghtValuesPanel.Children.Add(new Label() { Content = Math.Round(NeuralNetwork.Wj[j], 3).ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
             }
             
             for(int j=0; j<80; j++)
             {
                 goWeightNamesPanel.Children.Add(new Label() { Content = "bj " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
                 Slider bj = new Slider() { Minimum = -1, Maximum = 1, Height = 25,
-                    VerticalContentAlignment = VerticalAlignment.Center, Value = NeuralNetwork.Bj[j] };
+                    VerticalContentAlignment = VerticalAlignment.Center, Value = NeuralNetwork.Bj[j],
+                    SmallChange = 0.01
+                };
                 bj.ValueChanged += WeightSlider_ValueChanged;
+                bj.Loaded += Slider_Loaded;
                 goWeightSlidersPanel.Children.Add(bj);
-                goWeigghtValuesPanel.Children.Add(new Label() { Content = NeuralNetwork.Bj[j].ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                goWeigghtValuesPanel.Children.Add(new Label() { Content = Math.Round(NeuralNetwork.Bj[j],3).ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
             }
 
             for(int j=0; j<80; j++)
@@ -172,34 +194,68 @@ namespace FunctionNeuralNetwork
                 {
                     goWeightNamesPanel.Children.Add(new Label() { Content = "wij " + (i + 1) + ", " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
                     Slider wij = new Slider() { Minimum = -1, Maximum = 1, Height = 25,
-                        VerticalContentAlignment = VerticalAlignment.Center, Value = NeuralNetwork.Wij[i,j] };
+                        VerticalContentAlignment = VerticalAlignment.Center, Value = NeuralNetwork.Wij[i,j],
+                        SmallChange = 0.01
+                    };
                     wij.ValueChanged += WeightSlider_ValueChanged;
+                    wij.Loaded += Slider_Loaded;
                     goWeightSlidersPanel.Children.Add(wij);
-                    goWeigghtValuesPanel.Children.Add(new Label() { Content = NeuralNetwork.Wij[i, j].ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                    goWeigghtValuesPanel.Children.Add(new Label() { Content = Math.Round(NeuralNetwork.Wij[i, j], 3).ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
                 }
             }
+        }
+
+        private void Slider_Loaded(object sender, RoutedEventArgs e)
+        {
+            GetThumb(sender as Slider).DragCompleted += Slider_DragCompleted;
+            GetThumb(sender as Slider).DragStarted += Slider_DragStarted;
+        }
+
+        private void Slider_DragStarted(object sender, DragStartedEventArgs e)
+        {
+            gbDragStarted = true;
+        }
+
+        private void Slider_DragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            int element = goWeightSlidersPanel.Children.IndexOf((sender as Thumb).TemplatedParent as Slider);
+            if(element == 0)
+                NNViewer.UpdateAxonColor(AxonArray.b3, -1, -1);
+            gbDragStarted = false;
         }
 
         private void WeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             Slider slider = sender as Slider;
             int element = goWeightSlidersPanel.Children.IndexOf(slider);
+            (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round((slider.Value), 3).ToString();
             if (element == 0)
+            {
                 NeuralNetwork.B3 = slider.Value;
+                if (!gbDragStarted) NNViewer.UpdateAxonColor(AxonArray.b3, -1, -1);
+            }
             else if (element < 81)
+            {
                 NeuralNetwork.Wj[element - 1] = slider.Value;
+                if(!gbDragStarted) NNViewer.UpdateAxonColor(AxonArray.wj, -1, element - 1);
+            }
             else if (element < 161)
+            {
                 NeuralNetwork.Bj[element - 81] = slider.Value;
+                if(!gbDragStarted) NNViewer.UpdateAxonColor(AxonArray.bj, -1, element - 81);
+            }
             else
             {
                 element -= 161;
                 int j = element / 20;
                 int i = element % 20;
                 NeuralNetwork.Wij[i, j] = slider.Value;
+                if(!gbDragStarted) NNViewer.UpdateAxonColor(AxonArray.wij, i, j);
             }
-            (goWeigghtValuesPanel.Children[element] as Label).Content = slider.Value.ToString();
             VisualizeFunction(RendererEnum.NeuralNetwork);
         }
+
+        
 
         void UpdateWeightSliders()
         {
@@ -208,18 +264,18 @@ namespace FunctionNeuralNetwork
             
             int element = 1;
             (goWeightSlidersPanel.Children[0] as Slider).Value = NeuralNetwork.B3;
-            (goWeigghtValuesPanel.Children[0] as Label).Content = NeuralNetwork.B3.ToString();
+            (goWeigghtValuesPanel.Children[0] as Label).Content = Math.Round(NeuralNetwork.B3,3).ToString();
        
             for (int j = 0; j < 80; j++, element++)
             {
                 (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wj[j];
-                (goWeigghtValuesPanel.Children[element] as Label).Content = NeuralNetwork.Wj[j].ToString();
+                (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round(NeuralNetwork.Wj[j],3).ToString();
             }
 
             for (int j = 0; j < 80; j++, element++)
             {
                 (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Bj[j];
-                (goWeigghtValuesPanel.Children[element] as Label).Content = NeuralNetwork.Bj[j].ToString();
+                (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round(NeuralNetwork.Bj[j],3).ToString();
             }
 
             for (int j = 0; j < 80; j++)
@@ -227,7 +283,7 @@ namespace FunctionNeuralNetwork
                 for (int i = 0; i < 20; i++, element++)
                 {
                     (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wij[i,j];
-                    (goWeigghtValuesPanel.Children[element] as Label).Content = NeuralNetwork.Wij[i,j].ToString();
+                    (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round(NeuralNetwork.Wij[i,j],3).ToString();
                 }
             }
 
