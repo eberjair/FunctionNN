@@ -103,7 +103,6 @@
     <Compile Include="FletcherReevesIteration.cs" />
     <Compile Include="Functions\FunctionDefinition.cs" />
     <Compile Include="Functions\FunctionsImplementations.cs" />
-    <Compile Include="IntervalResult.cs" />
     <Compile Include="ExecutionParameters.cs" />
     <Compile Include="Viewers\AxonRenderer.cs" />
     <Compile Include="Viewers\FunctionViewer.xaml.cs">

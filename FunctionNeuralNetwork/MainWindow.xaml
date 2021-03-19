@@ -100,7 +100,7 @@
                         <Label Content="Sync visualization" VerticalAlignment="Center"/>
                         <Label Content="X1 Intervals (10-120):" Grid.Row="1" VerticalAlignment="Center"/>
                         <Label Content="X2 Intervals (10-120):" Grid.Row="2" VerticalAlignment="Center"/>
-                        <CheckBox Name="goSyncCB" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0,5"  IsChecked="True"/>
+                        <CheckBox Name="goSyncCB" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,5"  IsChecked="True"/>
                         <xctk:IntegerUpDown Name="goX1IntervalsIUD" Grid.Column="1" Grid.Row="1" Margin="10,3" Minimum="10" Maximum="120" Value="50"/>
                         <xctk:IntegerUpDown Name="goX2IntervalsIUD" Grid.Column="1" Grid.Row="2" Margin="10,3" Minimum="10" Maximum="120" Value="50"/>
                     </Grid>

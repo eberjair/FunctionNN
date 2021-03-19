@@ -70,6 +70,7 @@ namespace FunctionNeuralNetwork
             goLearningWorker = new BackgroundWorker { WorkerReportsProgress = true };
             goLearningWorker.DoWork += ExecuteLearning;
             goLearningWorker.RunWorkerCompleted += GoWorker_RunWorkerCompleted;
+            goLearningWorker.ProgressChanged += GoLearningWorker_ProgressChanged;
 
             goTestingWorker = new BackgroundWorker { WorkerReportsProgress = true };
             goTestingWorker.DoWork += GoTestingWorker_DoWork;
@@ -87,6 +88,8 @@ namespace FunctionNeuralNetwork
 
             this.Loaded += MainWindow_Loaded;
         }
+
+        
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -120,8 +123,7 @@ namespace FunctionNeuralNetwork
                 }
                     
             }
-            IntervalResult intervalResult = new IntervalResult(true, lsError);
-            e.Result = intervalResult;
+            e.Result = lsError;
         }
 
         private void GoFunctionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -356,41 +358,6 @@ namespace FunctionNeuralNetwork
             }
         }
 
-        private void GoWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            IntervalResult intervalResult = e.Result as IntervalResult;
-            double[] lsIntervalResults = intervalResult.IterationsError;
-            
-            for(int i = 0; i < lsIntervalResults.Length; i++, gnNextResultsIndex++)
-            {
-                gsErrorResults[gnNextResultsIndex] = lsIntervalResults[i];
-            }
-            if(intervalResult.IsLastInterval)
-            {
-                double[] dataToVisualize;
-                if(gsErrorResults.Length > 100)
-                {
-                    dataToVisualize = new double[100];
-                    int step = (int)(gsErrorResults.Length / 100d);
-                    for(int i=0; i<100; i++)
-                    {
-                        for(int j=0; j<step; j++)
-                        {
-                            dataToVisualize[i] += gsErrorResults[i * step + j];
-                        }
-                        dataToVisualize[i] /= (double)step;
-                    }
-                }
-                else
-                {
-                    dataToVisualize = gsErrorResults;
-                }
-                ChartModel chartModel = new ChartModel(dataToVisualize);
-                goPlotView.Model = chartModel.PlotModel;
-            }
-            progressWindow.AllowClosing();
-            progressWindow.Close();
-        }
 
         private void GoLearningButton_Click(object sender, RoutedEventArgs e)
         {
@@ -419,30 +386,21 @@ namespace FunctionNeuralNetwork
             int iterations = (int)goIterationsUpDown.Value;
             int interval = (int)goLearningIntervalVisualizationIUD.Value;
             if (interval == 0) interval = (int)goIterationsUpDown.Value;
-            int steps = (int)Math.Ceiling((double)iterations / (double)interval);
             
-            if(steps > 10)
+            if(interval < 10000 && iterations > 50000)
             {
-                MessageBoxResult boxResult = MessageBox.Show("There will be " + (steps - 1) + " visualizations before finishing the learning process.\nDo you want to continue?", "Learning process", MessageBoxButton.YesNo);
+                MessageBoxResult boxResult = MessageBox.Show("The interval between visualizations is relatively short, this may affect the app performance.\nDo you want to continue?", "Learning process", MessageBoxButton.YesNo);
                 if (boxResult == MessageBoxResult.No) return;
             }
 
-            progressWindow = new ProgressWindow(goLearningWorker);
+            progressWindow = new ProgressWindow();
             FunctionDefinition function = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex];
             gsErrorResults = new double[iterations];
             gnNextResultsIndex = 0;
-            for (int currentIterations = 0; currentIterations< iterations; )
-            {
-                LearningParameters learnOptions = new LearningParameters(factor, currentIterations, iterations, interval, function);
-                BackgroundArguments learnArguments = new BackgroundArguments(learnOptions, NeuralNetwork);
-                goLearningWorker.RunWorkerAsync(argument: learnArguments);
-                progressWindow.ShowDialog();
-                currentIterations += interval;
-                UpdateUIWeights();
-                progressWindow = new ProgressWindow(goLearningWorker);
-                if (currentIterations < iterations)
-                    MessageBox.Show("Interval executed", "Learning Process", MessageBoxButton.OK);
-            }
+            LearningParameters learnOptions = new LearningParameters(factor, iterations, interval, function);
+            BackgroundArguments learnArguments = new BackgroundArguments(learnOptions, NeuralNetwork);
+            goLearningWorker.RunWorkerAsync(argument: learnArguments);
+            progressWindow.ShowDialog();
         }
 
 
@@ -455,32 +413,120 @@ namespace FunctionNeuralNetwork
             FunctionDefinition functionDefinition = arguments.ExecutionOptions.FunctionDefinition;
             int iterations = options.Iterations;
             int interval = (options as LearningParameters).Interval;
-            int currentIterarions = (options as LearningParameters).CurrentIterations;
             GradientFactor gradientFactor = (options as LearningParameters).GradientFactor;
             double lnEta = 0.1;
             double s3 = 0;
-            double[] lsError = new double[Math.Min(interval, iterations-currentIterarions)];
-
-            for (int i=0; i< interval && currentIterarions<iterations; i++, currentIterarions++)
+            int lastPercentage = 0;
+            double[] lsError = null;
+            for (int i=0; i<iterations; i++)
             {
-                switch(gradientFactor)
+                if(i % interval == 0)
+                    lsError = new double[Math.Min(interval, iterations - i)];
+
+                switch (gradientFactor)
                 {
                     case GradientFactor.c2: lnEta = 0.01; break;
-                    case GradientFactor.n: lnEta = 0.1 / (currentIterarions + 1); break;
-                    case GradientFactor.ln: lnEta = 0.1 / Math.Log(currentIterarions + 2); break;
+                    case GradientFactor.n: lnEta = 0.1 / (i + 1); break;
+                    case GradientFactor.ln: lnEta = 0.1 / Math.Log(i + 2); break;
                 }
 
                 double[] x1 = GenerateX1();
                 double[] x2 = GenerateX2();
                 double y = functionDefinition.Evaluate(x1[1], x2[1]);
                 double yNormalized = NormalizeY(y);
-
-                neuralNetwork.LearnMaxDescend(x1[0], x2[0], yNormalized, lnEta, out s3);
-                lsError[i] = Math.Abs(s3 - yNormalized);
-                loWorker.ReportProgress(100 * i /interval);
+                lock(neuralNetwork)
+                {
+                    neuralNetwork.LearnMaxDescend(x1[0], x2[0], yNormalized, lnEta, out s3);
+                }
+                lsError[i%interval] = Math.Abs(s3 - yNormalized);
+                int lnPercentage = 100 * i / iterations;
+                if((i+1)%interval == 0)
+                {
+                    lastPercentage = lnPercentage;
+                    loWorker.ReportProgress(lnPercentage, lsError);
+                }
+                else if (lnPercentage > lastPercentage)
+                {
+                    lastPercentage = lnPercentage;
+                    loWorker.ReportProgress(lnPercentage, null);
+                }
             }
-            IntervalResult intervalResult = new IntervalResult(currentIterarions == iterations, lsError);
-            e.Result = intervalResult;
+            e.Result = lsError;
+        }
+
+        private void GoLearningWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if(e.UserState != null)
+            {
+                lock(NeuralNetwork)
+                {
+                    //VisualizeFunction(RendererEnum.NeuralNetwork);
+                    UpdateUIWeights();
+                }
+                lock(gsErrorResults)
+                {
+                    double[] lsError = (double[])e.UserState;
+                    lsError.CopyTo(gsErrorResults, gnNextResultsIndex);
+                    gnNextResultsIndex += lsError.Length;
+
+                    double[] dataToVisualize;
+                    if (gnNextResultsIndex > 100)
+                    {
+                        dataToVisualize = new double[100];
+                        int step = (int)(gnNextResultsIndex / 100d);
+                        for (int i = 0; i < 100; i++)
+                        {
+                            for (int j = 0; j < step; j++)
+                            {
+                                dataToVisualize[i] += gsErrorResults[i * step + j];
+                            }
+                            dataToVisualize[i] /= (double)step;
+                        }
+                    }
+                    else
+                    {
+                        dataToVisualize = new double[gnNextResultsIndex];
+                        for(int i=0; i<gnNextResultsIndex; i++)
+                        {
+                            dataToVisualize[i] = gsErrorResults[i];
+                        }
+                    }
+                    ChartModel chartModel = new ChartModel(dataToVisualize);
+                    goPlotView.Model = chartModel.PlotModel;
+                }
+            }
+            progressWindow.ProgressChanged(e.ProgressPercentage);
+        }
+
+        private void GoWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            double[] lsErrorsResult = (double[])e.Result;
+            if(gnNextResultsIndex < gsErrorResults.Length)
+            {
+                lsErrorsResult.CopyTo(gsErrorResults, gnNextResultsIndex);
+                double[] dataToVisualize;
+                if (gsErrorResults.Length > 100)
+                {
+                    dataToVisualize = new double[100];
+                    int step = (int)(gsErrorResults.Length / 100d);
+                    for (int i = 0; i < 100; i++)
+                    {
+                        for (int j = 0; j < step; j++)
+                        {
+                            dataToVisualize[i] += gsErrorResults[i * step + j];
+                        }
+                        dataToVisualize[i] /= (double)step;
+                    }
+                }
+                else
+                {
+                    dataToVisualize = gsErrorResults;
+                }
+                ChartModel chartModel = new ChartModel(dataToVisualize);
+                goPlotView.Model = chartModel.PlotModel;
+            }
+            progressWindow.AllowClosing();
+            progressWindow.Close();
         }
 
         double[] GenerateX1()
@@ -650,7 +696,7 @@ namespace FunctionNeuralNetwork
 
             int iterations = (int)goTestUpDown.Value;
             gnNextResultsIndex = 0;
-            progressWindow = new ProgressWindow(goTestingWorker) { Title="Testing Neural Network"};
+            progressWindow = new ProgressWindow() { Title="Testing Neural Network"};
             FunctionDefinition function = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex];
             gsErrorResults = new double[iterations];
             ExecutionParameters testingParameters = new ExecutionParameters(iterations, function);

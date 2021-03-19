@@ -12,14 +12,12 @@ namespace FunctionNeuralNetwork
     public class LearningParameters : ExecutionParameters
     {
         public GradientFactor GradientFactor { get;  }
-        public int CurrentIterations { get; }
         public int Interval { get; }
         
-        public LearningParameters(GradientFactor factor, int currentIterations, int iterations, int interval, FunctionDefinition functionDefinition):
+        public LearningParameters(GradientFactor factor, int iterations, int interval, FunctionDefinition functionDefinition):
             base(iterations, functionDefinition)
         {
             GradientFactor = factor;
-            CurrentIterations = currentIterations;
             Interval = interval;
         }
     }

@@ -20,14 +20,10 @@ namespace FunctionNeuralNetwork
     /// </summary>
     public partial class ProgressWindow : Window
     {
-        BackgroundWorker Worker;
-
-        public ProgressWindow(BackgroundWorker worker)
+        public ProgressWindow()
         {
             InitializeComponent();
             this.Closing += ProgressWindow_Closing;
-            Worker = worker;
-            worker.ProgressChanged += Worker_ProgressChanged;
         }
 
         public void AllowClosing()
@@ -40,9 +36,9 @@ namespace FunctionNeuralNetwork
             e.Cancel = true;
         }
 
-        private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        public void ProgressChanged(int percentage)
         {
-            goPB.Value = e.ProgressPercentage;
+            goPB.Value = percentage;
         }
     }
 }
