@@ -224,6 +224,17 @@ namespace FunctionNeuralNetwork
             int element = goWeightSlidersPanel.Children.IndexOf((sender as Thumb).TemplatedParent as Slider);
             if(element == 0)
                 NNViewer.UpdateAxonColor(AxonArray.b3, -1, -1);
+            else if (element < 81)
+                NNViewer.UpdateAxonColor(AxonArray.wj, -1, element - 1);
+            else if (element < 161)
+                NNViewer.UpdateAxonColor(AxonArray.bj, -1, element - 81);
+            else
+            {
+                element -= 161;
+                int j = element / 22;
+                int i = element % 22;   
+                NNViewer.UpdateAxonColor(AxonArray.wij, i, j);
+            }
             gbDragStarted = false;
         }
 
