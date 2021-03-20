@@ -35,7 +35,7 @@ namespace FunctionNeuralNetwork
             Parameters = new NNParameters();
 
             //Version2
-            S1 = new double[20];
+            S1 = new double[22];
             S2 = new double[80];
 
             X = Parameters.Mean;
@@ -46,7 +46,7 @@ namespace FunctionNeuralNetwork
             Wj = Parameters.Wj;
 
             BjG = new double[80];
-            WijG = new double[20, 80];
+            WijG = new double[22, 80];
             WjG = new double[80];
 
             
@@ -81,10 +81,10 @@ namespace FunctionNeuralNetwork
             
             //Version 2
             //Layer 1
-            for(int i=0; i<10; i++)
+            for(int i=0; i<11; i++)
             {
                 S1[i] = GaussFunction(x1, X[i], S[i]);
-                S1[i + 10] = GaussFunction(x2, X[i + 10], S[i + 10]);
+                S1[i + 11] = GaussFunction(x2, X[i + 11], S[i + 11]);
             }
 
             //Layer 2 & Layer 3
@@ -92,7 +92,7 @@ namespace FunctionNeuralNetwork
             for (int j=0; j<80; j++)
             {
                 double z = Bj[j];
-                for(int i=0; i<20; i++)
+                for(int i=0; i<22; i++)
                     z += Wij[i, j] * S1[i];
                 S2[j] = Sigmoid(z);
                 z3 += Wj[j] * S2[j];
@@ -119,7 +119,7 @@ namespace FunctionNeuralNetwork
                 Bj[j] += -lnN * BjG[j];
                 if (Bj[j] > 1) Bj[j] = 1;
                 if (Bj[j] < -1) Bj[j] = -1;
-                for (int i=0; i<20;i++)
+                for (int i=0; i<22;i++)
                 {
                     Wij[i, j] += -lnN * WijG[i, j];
                     if (Wij[i,j] > 1) Wij[i,j] = 1;
@@ -224,7 +224,7 @@ namespace FunctionNeuralNetwork
                 WjG[j] = B3G * S2[j];
                 dS2dzj[j] = S2[j] * (1 - S2[j]);
                 BjG[j] = B3G * Wj[j] * dS2dzj[j];
-                for(int i= 0; i<20; i++)
+                for(int i= 0; i<22; i++)
                 {
                     WijG[i, j] = BjG[j] * S1[i];
                 }

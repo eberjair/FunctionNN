@@ -26,18 +26,18 @@ namespace FunctionNeuralNetwork
         {
             Random random = new Random();
 
-            Mean = new double[20] { 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95 };
-            Dev = new double[20] { 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2 };
+            Mean = new double[22] {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
+            Dev = new double[22] { 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2 };
             B3 = random.NextDouble() * 2 - 1;
             Bj = new double[80];
-            Wij = new double[20, 80];
+            Wij = new double[22, 80];
             Wj = new double[80];
 
             for(int j = 0; j<80; j++)
             {
                 Bj[j] = random.NextDouble() * 2 - 1;
                 Wj[j] = random.NextDouble() * 2 - 1;
-                for(int i = 0; i<20; i++)
+                for(int i = 0; i<22; i++)
                 {
                     Wij[i, j] = random.NextDouble() * 2 - 1;
                 }
@@ -49,7 +49,7 @@ namespace FunctionNeuralNetwork
             StreamWriter streamWriter = new StreamWriter(lcPath, false);
             for (int j = 0; j < 80; j++)
             {
-                for (int i = 0; i < 20; i++)
+                for (int i = 0; i < 22; i++)
                 {
                     
                     streamWriter.WriteLine(Wij[i, j]);
@@ -71,7 +71,7 @@ namespace FunctionNeuralNetwork
         {
             try
             {
-                double[,] posWij = new double[20, 80];
+                double[,] posWij = new double[22, 80];
                 double[] posBj = new double[80];
                 double[] posWj = new double[80];
                 double posB3;
@@ -79,7 +79,7 @@ namespace FunctionNeuralNetwork
                 {
                     for (int j = 0; j < 80; j++)
                     {
-                        for (int i = 0; i < 20; i++)
+                        for (int i = 0; i < 22; i++)
                         {
                             Double.TryParse(streamReader.ReadLine(), out posWij[i, j]);
                         }

@@ -149,7 +149,7 @@ namespace FunctionNeuralNetwork
             X2.Render(goRenderer);
             gsInputNeurons.Add(X2);
 
-            for(int i = 0; i<21;i++)
+            for(int i = 0; i<23;i++)
             {
                 NeuronRenderer S1Neuron = new NeuronRenderer(new double[] { 40, 4 + 8 * i, 0 });
                 S1Neuron.Render(goRenderer);
@@ -183,15 +183,15 @@ namespace FunctionNeuralNetwork
             {
                 List<AxonRenderer> axons = new List<AxonRenderer>();
                 gsInputS1Axons.Add(axons);
-                for(int j = 0; j<10; j++)
+                for(int j = 0; j<11; j++)
                 {
-                    AxonRenderer axon = new AxonRenderer(new double[] { 1, 40 + 80 * i, 39, 4 + 8 * j + 80 * i });
+                    AxonRenderer axon = new AxonRenderer(new double[] { 1, 40 + 80 * i, 39, 4 + 8 * j + 88 * i });
                     axon.Render(goRenderer);
                     axons.Add(axon);
                 }
             }
 
-            for(int i=0; i<21; i++)
+            for(int i=0; i<23; i++)
             {
                 List<AxonRenderer> axons = new List<AxonRenderer>();
                 gsS1S2Axons.Add(axons);
@@ -201,7 +201,7 @@ namespace FunctionNeuralNetwork
                     axon.Render(goRenderer);
                     axons.Add(axon);
                     double[] color;
-                    color = i<20? lookupTable.GetColor(NeuralNetwork.Wij[i, j]) : lookupTable.GetColor(NeuralNetwork.Bj[j]);
+                    color = i<22? lookupTable.GetColor(NeuralNetwork.Wij[i, j]) : lookupTable.GetColor(NeuralNetwork.Bj[j]);
                     axon.SetColor(color[0], color[1], color[2]);
                 }
             }
@@ -224,11 +224,11 @@ namespace FunctionNeuralNetwork
 
         public void UpdateAxonsColor()
         {
-            for(int i=0; i<21;i++)
+            for(int i=0; i<23;i++)
             {
                 for(int j=0; j<80; j++)
                 {
-                    double[] color = i<20 ? lookupTable.GetColor(NeuralNetwork.Wij[i, j]) : lookupTable.GetColor(NeuralNetwork.Bj[j]);
+                    double[] color = i<22 ? lookupTable.GetColor(NeuralNetwork.Wij[i, j]) : lookupTable.GetColor(NeuralNetwork.Bj[j]);
                     gsS1S2Axons[i][j].SetColor(color[0], color[1], color[2]);
                 }
             }
@@ -252,7 +252,7 @@ namespace FunctionNeuralNetwork
                     break;
                 case AxonArray.bj:
                     color = lookupTable.GetColor(NeuralNetwork.Bj[j]);
-                    gsS1S2Axons[20][j].SetColor(color[0], color[1], color[2]);
+                    gsS1S2Axons[22][j].SetColor(color[0], color[1], color[2]);
                     break;
                 case AxonArray.wij:
                     color = lookupTable.GetColor(NeuralNetwork.Wij[i, j]);

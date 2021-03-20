@@ -193,7 +193,7 @@ namespace FunctionNeuralNetwork
 
             for(int j=0; j<80; j++)
             {
-                for(int i=0; i<20; i++)
+                for(int i=0; i<22; i++)
                 {
                     goWeightNamesPanel.Children.Add(new Label() { Content = "wij " + (i + 1) + ", " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
                     Slider wij = new Slider() { Minimum = -1, Maximum = 1, Height = 25,
@@ -250,8 +250,8 @@ namespace FunctionNeuralNetwork
             else
             {
                 element -= 161;
-                int j = element / 20;
-                int i = element % 20;
+                int j = element / 22;
+                int i = element % 22;
                 NeuralNetwork.Wij[i, j] = slider.Value;
                 if(!gbDragStarted) NNViewer.UpdateAxonColor(AxonArray.wij, i, j);
             }
@@ -283,7 +283,7 @@ namespace FunctionNeuralNetwork
 
             for (int j = 0; j < 80; j++)
             {
-                for (int i = 0; i < 20; i++, element++)
+                for (int i = 0; i < 22; i++, element++)
                 {
                     (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wij[i,j];
                     (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round(NeuralNetwork.Wij[i,j],3).ToString();
