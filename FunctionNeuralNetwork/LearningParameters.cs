@@ -8,17 +8,19 @@ using FunctionNeuralNetwork.Functions;
 
 namespace FunctionNeuralNetwork
 {
-    public enum GradientFactor { n, ln, c1, c2 }
+    public enum GradientFactorType { n, ln, constant}
     public class LearningParameters : ExecutionParameters
     {
-        public GradientFactor GradientFactor { get;  }
+        public GradientFactorType GradientFactorType { get;  }
         public int Interval { get; }
-        
-        public LearningParameters(GradientFactor factor, int iterations, int interval, FunctionDefinition functionDefinition):
+        public double GradientFactor;
+
+        public LearningParameters(GradientFactorType factorType, int iterations, int interval, FunctionDefinition functionDefinition, double gradientFactor):
             base(iterations, functionDefinition)
         {
-            GradientFactor = factor;
+            GradientFactorType = factorType;
             Interval = interval;
+            GradientFactor = gradientFactor;
         }
     }
 }

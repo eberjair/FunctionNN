@@ -85,6 +85,7 @@ namespace FunctionNeuralNetwork
             goX2maxIUP.ValueChanged += DomainValueChanged;
             goYminIUP.ValueChanged += DomainValueChanged;
             goYmaxIUP.ValueChanged += DomainValueChanged;
+            goGradientFactorComboBox.SelectionChanged += GoGradientFactorComboBox_SelectionChanged;
 
             this.Loaded += MainWindow_Loaded;
         }
@@ -376,12 +377,11 @@ namespace FunctionNeuralNetwork
                 return;
             }
 
-            GradientFactor factor = GradientFactor.n;;
+            GradientFactorType factor = GradientFactorType.n;
             switch(goGradientFactorComboBox.SelectedIndex)
             {
-                case 1: factor = GradientFactor.ln; break;
-                case 2: factor = GradientFactor.c1; break;
-                case 3: factor = GradientFactor.c2; break;
+                case 1: factor = GradientFactorType.ln; break;
+                case 2: factor = GradientFactorType.constant; break;
             }
             int iterations = (int)goIterationsUpDown.Value;
             int interval = (int)goLearningIntervalVisualizationIUD.Value;
@@ -397,7 +397,7 @@ namespace FunctionNeuralNetwork
             FunctionDefinition function = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex];
             gsErrorResults = new double[iterations];
             gnNextResultsIndex = 0;
-            LearningParameters learnOptions = new LearningParameters(factor, iterations, interval, function);
+            LearningParameters learnOptions = new LearningParameters(factor, iterations, interval, function, (double)goConstantUD.Value);
             BackgroundArguments learnArguments = new BackgroundArguments(learnOptions, NeuralNetwork);
             goLearningWorker.RunWorkerAsync(argument: learnArguments);
             progressWindow.ShowDialog();
@@ -413,8 +413,8 @@ namespace FunctionNeuralNetwork
             FunctionDefinition functionDefinition = arguments.ExecutionOptions.FunctionDefinition;
             int iterations = options.Iterations;
             int interval = (options as LearningParameters).Interval;
-            GradientFactor gradientFactor = (options as LearningParameters).GradientFactor;
-            double lnEta = 0.1;
+            GradientFactorType gradientFactor = (options as LearningParameters).GradientFactorType;
+            double lnEta = (options as LearningParameters).GradientFactor; 
             double s3 = 0;
             int lastPercentage = 0;
             double[] lsError = null;
@@ -425,9 +425,8 @@ namespace FunctionNeuralNetwork
 
                 switch (gradientFactor)
                 {
-                    case GradientFactor.c2: lnEta = 0.01; break;
-                    case GradientFactor.n: lnEta = 0.1 / (i + 1); break;
-                    case GradientFactor.ln: lnEta = 0.1 / Math.Log(i + 2); break;
+                    case GradientFactorType.n: lnEta = 0.1 / (i + 1); break;
+                    case GradientFactorType.ln: lnEta = 0.1 / Math.Log(i + 2); break;
                 }
 
                 double[] x1 = GenerateX1();
@@ -703,6 +702,11 @@ namespace FunctionNeuralNetwork
             BackgroundArguments backgroundArguments = new BackgroundArguments(testingParameters, NeuralNetwork);
             goTestingWorker.RunWorkerAsync(argument: backgroundArguments);
             progressWindow.ShowDialog();
+        }
+
+        private void GoGradientFactorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            goConstantUD.IsEnabled = goGradientFactorComboBox.SelectedIndex == 2;
         }
     }
 
