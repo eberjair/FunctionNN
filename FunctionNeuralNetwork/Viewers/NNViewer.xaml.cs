@@ -151,7 +151,7 @@ namespace FunctionNeuralNetwork
 
             for(int i = 0; i<23;i++)
             {
-                NeuronRenderer S1Neuron = new NeuronRenderer(new double[] { 40, 4 + 8 * i, 0 });
+                NeuronRenderer S1Neuron = new NeuronRenderer(new double[] { 40, -4 + 8 * i, 0 });
                 S1Neuron.Render(goRenderer);
                 gsS1Neurons.Add(S1Neuron);
             }
@@ -160,7 +160,7 @@ namespace FunctionNeuralNetwork
 
             for (int i = 0; i < 81; i++)
             {
-                NeuronRenderer S2Neuron = new NeuronRenderer(new double[] { 80, 1 + 2 * i, 0 });
+                NeuronRenderer S2Neuron = new NeuronRenderer(new double[] { 80, -1 + 2 * i, 0 });
                 S2Neuron.Render(goRenderer);
                 gsS2Neurons.Add(S2Neuron);
             }
@@ -197,21 +197,21 @@ namespace FunctionNeuralNetwork
                 gsS1S2Axons.Add(axons);
                 for(int j=0; j<80;j++)
                 {
-                    AxonRenderer axon = new AxonRenderer(new double[] { 41, 4 + 8 * i, 79, 1 + 2 * j });
+                    AxonRenderer axon = new AxonRenderer(new double[] { 41, -4 + 8 * i, 79, 1 + 2 * j });
                     axon.Render(goRenderer);
                     axons.Add(axon);
                     double[] color;
-                    color = i<22? lookupTable.GetColor(NeuralNetwork.Wij[i, j]) : lookupTable.GetColor(NeuralNetwork.Bj[j]);
+                    color = i>0? lookupTable.GetColor(NeuralNetwork.Wij[i -1, j]) : lookupTable.GetColor(NeuralNetwork.Bj[j]);
                     axon.SetColor(color[0], color[1], color[2]);
                 }
             }
 
-            for(int i=0; i<81;i++)
+            for(int j=0; j<81;j++)
             {
-                AxonRenderer axon = new AxonRenderer(new double[] { 81, 1+2*i, 119, 80 });
+                AxonRenderer axon = new AxonRenderer(new double[] { 81, -1+2*j, 119, 80 });
                 axon.Render(goRenderer);
                 gsS2S3Axons.Add(axon);
-                double[] color = i<80? lookupTable.GetColor(NeuralNetwork.Wj[i]): lookupTable.GetColor(NeuralNetwork.B3);
+                double[] color = j>0? lookupTable.GetColor(NeuralNetwork.Wj[j-1]): lookupTable.GetColor(NeuralNetwork.B3);
                 axon.SetColor(color[0], color[1], color[2]);
             }
 
@@ -228,14 +228,14 @@ namespace FunctionNeuralNetwork
             {
                 for(int j=0; j<80; j++)
                 {
-                    double[] color = i<22 ? lookupTable.GetColor(NeuralNetwork.Wij[i, j]) : lookupTable.GetColor(NeuralNetwork.Bj[j]);
+                    double[] color = i>0 ? lookupTable.GetColor(NeuralNetwork.Wij[i-1, j]) : lookupTable.GetColor(NeuralNetwork.Bj[j]);
                     gsS1S2Axons[i][j].SetColor(color[0], color[1], color[2]);
                 }
             }
 
             for(int j=0; j<81; j++)
             {
-                double[] color = j<80? lookupTable.GetColor(NeuralNetwork.Wj[j]) : lookupTable.GetColor(NeuralNetwork.B3);
+                double[] color = j>0? lookupTable.GetColor(NeuralNetwork.Wj[j-1]) : lookupTable.GetColor(NeuralNetwork.B3);
                 gsS2S3Axons[j].SetColor(color[0], color[1], color[2]);
             }
             goInteractor.Render();
@@ -248,19 +248,19 @@ namespace FunctionNeuralNetwork
             {
                 case AxonArray.b3:
                     color = lookupTable.GetColor(NeuralNetwork.B3);
-                    gsS2S3Axons[80].SetColor(color[0], color[1], color[2]);
+                    gsS2S3Axons[0].SetColor(color[0], color[1], color[2]);
                     break;
                 case AxonArray.bj:
                     color = lookupTable.GetColor(NeuralNetwork.Bj[j]);
-                    gsS1S2Axons[22][j].SetColor(color[0], color[1], color[2]);
+                    gsS1S2Axons[0][j].SetColor(color[0], color[1], color[2]);
                     break;
                 case AxonArray.wij:
                     color = lookupTable.GetColor(NeuralNetwork.Wij[i, j]);
-                    gsS1S2Axons[i][j].SetColor(color[0], color[1], color[2]);
+                    gsS1S2Axons[i+1][j].SetColor(color[0], color[1], color[2]);
                     break;
                 case AxonArray.wj:
                     color = lookupTable.GetColor(NeuralNetwork.Wj[j]);
-                    gsS2S3Axons[j].SetColor(color[0], color[1], color[2]);
+                    gsS2S3Axons[j+1].SetColor(color[0], color[1], color[2]);
                     break;
             }
             goInteractor.Render();
