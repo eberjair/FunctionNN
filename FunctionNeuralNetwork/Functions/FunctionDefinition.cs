@@ -12,11 +12,11 @@ namespace FunctionNeuralNetwork.Functions
     {
         public DelegateFunction FunctionImplementation;
         public readonly string Label;
-        public int[] DefaultX1Domain { get; private set; }
-        public int[] DefaultX2Domain { get; private set; }
-        public int[] DefaultYRange { get; private set; }
+        public double[] DefaultX1Domain { get; private set; }
+        public double[] DefaultX2Domain { get; private set; }
+        public double[] DefaultYRange { get; private set; }
 
-        public FunctionDefinition(DelegateFunction functionImplementation, int[] defaultX1, int[] defaultX2, int[] defaultY ,string label)
+        public FunctionDefinition(DelegateFunction functionImplementation, double[] defaultX1, double[] defaultX2, double[] defaultY ,string label)
         {
             FunctionImplementation = functionImplementation;
             DefaultX1Domain = defaultX1;
