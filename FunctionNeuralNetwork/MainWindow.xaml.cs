@@ -17,6 +17,7 @@ using System.ComponentModel;
 using System.Windows.Controls.Primitives;
 using FunctionNeuralNetwork.Functions;
 using Microsoft.Win32;
+using XCD= Xceed.Wpf.Toolkit;
 
 namespace FunctionNeuralNetwork
 {
@@ -38,7 +39,7 @@ namespace FunctionNeuralNetwork
         double[] YRange;
         double[] gsErrorResults;
         int gnNextResultsIndex;
-
+        
         bool gbDragStarted = false;
 
         public MainWindow()
@@ -163,19 +164,39 @@ namespace FunctionNeuralNetwork
             b3Slider.ValueChanged += WeightSlider_ValueChanged;
             b3Slider.Loaded += Slider_Loaded;
             goWeightSlidersPanel.Children.Add(b3Slider);
-            goWeigghtValuesPanel.Children.Add(new Label() { Content = Math.Round(NeuralNetwork.B3,3).ToString() , Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+            XCD.DoubleUpDown doubleUpDownB3 = new XCD.DoubleUpDown()
+            {
+                Minimum = -1,
+                Maximum = 1,
+                Increment = 0.1,
+                Value = NeuralNetwork.B3,
+                VerticalAlignment = VerticalAlignment.Center,
+                Height = 25,
+            };
+            doubleUpDownB3.ValueChanged += DoubleUpDown_ValueChanged;
+            goWeigghtValuesPanel.Children.Add(doubleUpDownB3);
 
-            for(int j=0; j<80; j++)
+            for (int j=0; j<80; j++)
             {
                 goWeightNamesPanel.Children.Add(new Label() { Content = "wj " + (j + 1), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
                 Slider wj = new Slider() { Minimum = -1, Maximum = 1, Height = 25,
-                    VerticalContentAlignment = VerticalAlignment.Center, Value =NeuralNetwork.Wj[j],
+                    VerticalContentAlignment = VerticalAlignment.Center, Value = NeuralNetwork.Wj[j],
                     SmallChange = 0.01
                 };
                 wj.ValueChanged += WeightSlider_ValueChanged;
                 wj.Loaded += Slider_Loaded;
                 goWeightSlidersPanel.Children.Add(wj);
-                goWeigghtValuesPanel.Children.Add(new Label() { Content = Math.Round(NeuralNetwork.Wj[j], 3).ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                XCD.DoubleUpDown doubleUpDown = new XCD.DoubleUpDown()
+                {
+                    Minimum = -1,
+                    Maximum = 1,
+                    Increment = 0.1,
+                    Value = NeuralNetwork.Wj[j],
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Height = 25
+                };
+                doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
+                goWeigghtValuesPanel.Children.Add(doubleUpDown);
             }
             
             for(int j=0; j<80; j++)
@@ -188,7 +209,18 @@ namespace FunctionNeuralNetwork
                 bj.ValueChanged += WeightSlider_ValueChanged;
                 bj.Loaded += Slider_Loaded;
                 goWeightSlidersPanel.Children.Add(bj);
-                goWeigghtValuesPanel.Children.Add(new Label() { Content = Math.Round(NeuralNetwork.Bj[j],3).ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                XCD.DoubleUpDown doubleUpDown = new XCD.DoubleUpDown()
+                {
+                    Minimum = -1,
+                    Maximum = 1,
+                    Increment = 0.1,
+                    Value = NeuralNetwork.Bj[j],
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Height = 25
+                };
+                doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
+                goWeigghtValuesPanel.Children.Add(doubleUpDown);
+                
             }
 
             for(int j=0; j<80; j++)
@@ -203,9 +235,54 @@ namespace FunctionNeuralNetwork
                     wij.ValueChanged += WeightSlider_ValueChanged;
                     wij.Loaded += Slider_Loaded;
                     goWeightSlidersPanel.Children.Add(wij);
-                    goWeigghtValuesPanel.Children.Add(new Label() { Content = Math.Round(NeuralNetwork.Wij[i, j], 3).ToString(), Height = 25, VerticalContentAlignment = VerticalAlignment.Center });
+                    XCD.DoubleUpDown doubleUpDown = new XCD.DoubleUpDown()
+                    {
+                        Minimum = -1,
+                        Maximum = 1,
+                        Increment = 0.1,
+                        Value = NeuralNetwork.Wij[i, j],
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Height = 25
+                    };
+                    doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
+                    goWeigghtValuesPanel.Children.Add(doubleUpDown);
                 }
             }
+        }
+
+        private void DoubleUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            XCD.DoubleUpDown doubleUpDown = sender as XCD.DoubleUpDown;
+            if (doubleUpDown.Value is null) return;
+            int element = goWeigghtValuesPanel.Children.IndexOf(doubleUpDown);
+            Slider slider = goWeightSlidersPanel.Children[element] as Slider;
+            slider.ValueChanged -= WeightSlider_ValueChanged;
+            slider.Value = (double)doubleUpDown.Value;
+            slider.ValueChanged += WeightSlider_ValueChanged;
+            if (element == 0)
+            {
+                NeuralNetwork.B3 = (double)doubleUpDown.Value;
+                NNViewer.UpdateAxonColor(AxonArray.b3, -1, -1);
+            }
+            else if (element < 81)
+            {
+                NeuralNetwork.Wj[element - 1] = (double)doubleUpDown.Value;
+                NNViewer.UpdateAxonColor(AxonArray.wj, -1, element - 1);
+            }
+            else if (element < 161)
+            {
+                NeuralNetwork.Bj[element - 81] = (double)doubleUpDown.Value;
+                NNViewer.UpdateAxonColor(AxonArray.bj, -1, element - 81);
+            }
+            else
+            {
+                element -= 161;
+                int j = element / 22;
+                int i = element % 22;
+                NeuralNetwork.Wij[i, j] = (double)doubleUpDown.Value;
+                NNViewer.UpdateAxonColor(AxonArray.wij, i, j);
+            }
+            VisualizeFunction(RendererEnum.NeuralNetwork);
         }
 
         private void Slider_Loaded(object sender, RoutedEventArgs e)
@@ -242,7 +319,10 @@ namespace FunctionNeuralNetwork
         {
             Slider slider = sender as Slider;
             int element = goWeightSlidersPanel.Children.IndexOf(slider);
-            (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round((slider.Value), 3).ToString();
+            XCD.DoubleUpDown doubleUpDown = goWeigghtValuesPanel.Children[element] as XCD.DoubleUpDown;
+            doubleUpDown.ValueChanged -= DoubleUpDown_ValueChanged;
+            doubleUpDown.Value = slider.Value;
+            doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
             if (element == 0)
             {
                 NeuralNetwork.B3 = slider.Value;
@@ -639,6 +719,8 @@ namespace FunctionNeuralNetwork
 
         private void DomainValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+            if ((sender as XCD.DoubleUpDown).Value is null) return;
+
             double x1Min = (double)goX1minIUP.Value;
             double x1Max = (double)goX1maxIUP.Value;
             double x2Min = (double)goX2minIUP.Value;
