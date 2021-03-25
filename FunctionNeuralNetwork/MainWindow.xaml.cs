@@ -272,10 +272,13 @@ namespace FunctionNeuralNetwork
             gsInvalidWeightDoubleUDs.Remove(doubleUpDown);
             if(gsInvalidWeightDoubleUDs.Count == 0)
             {
-                goLearningButton.IsEnabled = true;
-                goTestButton.IsEnabled = true;
-                goRefreshB.IsEnabled = true;
                 goSaveB.IsEnabled = true;
+                if(gsInvalidDomainDoubleUDs.Count == 0)
+                {
+                    goLearningButton.IsEnabled = true;
+                    goTestButton.IsEnabled = true;
+                    goRefreshB.IsEnabled = true;
+                }
             }
             int element = goWeigghtValuesPanel.Children.IndexOf(doubleUpDown);
             Slider slider = goWeightSlidersPanel.Children[element] as Slider;
@@ -345,21 +348,19 @@ namespace FunctionNeuralNetwork
             XCD.DoubleUpDown doubleUpDown = goWeigghtValuesPanel.Children[element] as XCD.DoubleUpDown;
             doubleUpDown.ValueChanged -= DoubleUpDown_ValueChanged;
             doubleUpDown.Value = slider.Value;
-
-
             BrushConverter converter = new BrushConverter();
             doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
             gsInvalidWeightDoubleUDs.Remove(doubleUpDown);
             if (gsInvalidWeightDoubleUDs.Count == 0)
             {
-                goLearningButton.IsEnabled = true;
-                goTestButton.IsEnabled = true;
-                goRefreshB.IsEnabled = true;
                 goSaveB.IsEnabled = true;
+                if(gsInvalidDomainDoubleUDs.Count == 0)
+                {
+                    goLearningButton.IsEnabled = true;
+                    goTestButton.IsEnabled = true;
+                    goRefreshB.IsEnabled = true;
+                }
             }
-
-
-
             doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
             if (element == 0)
             {
@@ -757,7 +758,20 @@ namespace FunctionNeuralNetwork
 
         private void DomainValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if ((sender as XCD.DoubleUpDown).Value is null) return;
+            XCD.DoubleUpDown doubleUpDown = sender as XCD.DoubleUpDown;
+            if(doubleUpDown.Value is null)
+            {
+                doubleUpDown.BorderBrush = Brushes.Red;
+                gsInvalidDomainDoubleUDs.Add(doubleUpDown);
+                goLearningButton.IsEnabled = false;
+                goTestButton.IsEnabled = false;
+                goRefreshB.IsEnabled = false;
+                return;
+            }
+            BrushConverter converter = new BrushConverter();
+            doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            gsInvalidDomainDoubleUDs.Remove(doubleUpDown);
+
 
             double x1Min = (double)goX1minIUP.Value;
             double x1Max = (double)goX1maxIUP.Value;
@@ -765,8 +779,7 @@ namespace FunctionNeuralNetwork
             double x2Max = (double)goX2maxIUP.Value;
             double yMin = (double)goYminIUP.Value;
             double yMax = (double)goYmaxIUP.Value;
-
-            BrushConverter converter = new BrushConverter();
+            
             if (x1Min >= x1Max)
             {
                 goX1minIUP.BorderBrush = Brushes.Red;
