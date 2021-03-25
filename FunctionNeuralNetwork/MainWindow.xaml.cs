@@ -30,6 +30,8 @@ namespace FunctionNeuralNetwork
         BackgroundWorker goLearningWorker;
         BackgroundWorker goTestingWorker;
         List<FunctionDefinition> gsFunctionDefinitions;
+        List<XCD.DoubleUpDown> gsInvalidWeightDoubleUDs;
+        List<XCD.DoubleUpDown> gsInvalidDomainDoubleUDs;
         ProgressWindow progressWindow;
         FunctionViewer FunctionViewer;
         NNViewer NNViewer;
@@ -50,6 +52,8 @@ namespace FunctionNeuralNetwork
             NeuralNetwork = new NeuralNetwork();
             FunctionViewer = new FunctionViewer(goFuncHost, this);
             NNViewer = new NNViewer(goNNHost, NeuralNetwork);
+            gsInvalidWeightDoubleUDs = new List<XCD.DoubleUpDown>();
+            gsInvalidDomainDoubleUDs = new List<XCD.DoubleUpDown>();
 
             X1Domain = new double[2] { (double)goX1minIUP.Value , (double)goX1maxIUP.Value};
             X2Domain = new double[2] { (double)goX2minIUP.Value, (double)goX2maxIUP.Value };
@@ -253,7 +257,26 @@ namespace FunctionNeuralNetwork
         private void DoubleUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             XCD.DoubleUpDown doubleUpDown = sender as XCD.DoubleUpDown;
-            if (doubleUpDown.Value is null) return;
+            BrushConverter converter = new BrushConverter();
+            if (doubleUpDown.Value is null)
+            {
+                doubleUpDown.BorderBrush = Brushes.Red;
+                goLearningButton.IsEnabled = false;
+                goTestButton.IsEnabled = false;
+                goRefreshB.IsEnabled = false;
+                goSaveB.IsEnabled = false;
+                gsInvalidWeightDoubleUDs.Add(doubleUpDown);
+                return;
+            }
+            doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            gsInvalidWeightDoubleUDs.Remove(doubleUpDown);
+            if(gsInvalidWeightDoubleUDs.Count == 0)
+            {
+                goLearningButton.IsEnabled = true;
+                goTestButton.IsEnabled = true;
+                goRefreshB.IsEnabled = true;
+                goSaveB.IsEnabled = true;
+            }
             int element = goWeigghtValuesPanel.Children.IndexOf(doubleUpDown);
             Slider slider = goWeightSlidersPanel.Children[element] as Slider;
             slider.ValueChanged -= WeightSlider_ValueChanged;
@@ -322,6 +345,21 @@ namespace FunctionNeuralNetwork
             XCD.DoubleUpDown doubleUpDown = goWeigghtValuesPanel.Children[element] as XCD.DoubleUpDown;
             doubleUpDown.ValueChanged -= DoubleUpDown_ValueChanged;
             doubleUpDown.Value = slider.Value;
+
+
+            BrushConverter converter = new BrushConverter();
+            doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            gsInvalidWeightDoubleUDs.Remove(doubleUpDown);
+            if (gsInvalidWeightDoubleUDs.Count == 0)
+            {
+                goLearningButton.IsEnabled = true;
+                goTestButton.IsEnabled = true;
+                goRefreshB.IsEnabled = true;
+                goSaveB.IsEnabled = true;
+            }
+
+
+
             doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
             if (element == 0)
             {
