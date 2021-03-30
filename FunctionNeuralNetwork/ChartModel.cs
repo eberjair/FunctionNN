@@ -36,7 +36,7 @@ namespace FunctionNeuralNetwork
 
         void InitializeModel()
         {
-            PlotModel = new PlotModel { Title = "Last execution/learning error\n(Subsampling 100 mean values max)", TitleFontSize = 10 };
+            PlotModel = new PlotModel { Title = "Last test/learning errors\n(Subsampling 100 mean values max)", TitleFontSize = 10 };
             // A ColumnSeries requires a CategoryAxis on the x-axis.
             CategoryAxis errorCategory = new CategoryAxis
             {
