@@ -682,9 +682,8 @@ namespace FunctionNeuralNetwork
             if(e.UserState != null)
             {
                 lock(NeuralNetwork)
-                {
-                    //VisualizeFunction(RendererEnum.NeuralNetwork);
-                    UpdateUIWeights();
+                { 
+                    VisualizeFunction(RendererEnum.NeuralNetwork);  
                 }
                 lock(gsErrorResults)
                 {
@@ -748,6 +747,7 @@ namespace FunctionNeuralNetwork
                 ChartModel chartModel = new ChartModel(dataToVisualize);
                 goPlotView.Model = chartModel.PlotModel;
             }
+            UpdateUIWeights();
             progressWindow.AllowClosing();
             progressWindow.Close();
         }
