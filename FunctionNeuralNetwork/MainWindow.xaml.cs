@@ -18,6 +18,7 @@ using System.Windows.Controls.Primitives;
 using FunctionNeuralNetwork.Functions;
 using Microsoft.Win32;
 using XCD= Xceed.Wpf.Toolkit;
+using Xceed.Wpf.Toolkit.Primitives;
 
 namespace FunctionNeuralNetwork
 {
@@ -31,7 +32,10 @@ namespace FunctionNeuralNetwork
         BackgroundWorker goTestingWorker;
         List<FunctionDefinition> gsFunctionDefinitions;
         List<XCD.DoubleUpDown> gsInvalidWeightDoubleUDs;
-        List<XCD.DoubleUpDown> gsInvalidDomainDoubleUDs;
+        List<InputBase> gsInvalidDomainUDs;
+        List<InputBase> gsInvalidLearningOptions;
+        bool gbInvalidadTestParameter;
+
         ProgressWindow progressWindow;
         FunctionViewer FunctionViewer;
         NNViewer NNViewer;
@@ -53,7 +57,9 @@ namespace FunctionNeuralNetwork
             FunctionViewer = new FunctionViewer(goFuncHost, this);
             NNViewer = new NNViewer(goNNHost, NeuralNetwork);
             gsInvalidWeightDoubleUDs = new List<XCD.DoubleUpDown>();
-            gsInvalidDomainDoubleUDs = new List<XCD.DoubleUpDown>();
+            gsInvalidDomainUDs = new List<InputBase>();
+            gsInvalidLearningOptions = new List<InputBase>();
+            gbInvalidadTestParameter = false;
 
             X1Domain = new double[2] { (double)goX1minIUP.Value , (double)goX1maxIUP.Value};
             X2Domain = new double[2] { (double)goX2minIUP.Value, (double)goX2maxIUP.Value };
@@ -65,12 +71,9 @@ namespace FunctionNeuralNetwork
             gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinSumAbsX1X2, new double[2] { -4, 4 }, new double[2] { -4, 4 }, new double[2] { -1, 1 }, "y=sin(|x1|+|x2|)"));
             gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.SinProductX1X2, new double[2] { -2, 2 }, new double[2] { -2, 2 }, new double[2] { -1, 1 }, "y=sin(x1*x2)"));
             
-
             for (int i = 0; i < gsFunctionDefinitions.Count; i++)
                 goFunctionComboBox.Items.Add(gsFunctionDefinitions[i].Label);
             goFunctionComboBox.SelectedIndex = 0;
-
-            
 
             goLearningWorker = new BackgroundWorker { WorkerReportsProgress = true };
             goLearningWorker.DoWork += ExecuteLearning;
@@ -84,13 +87,44 @@ namespace FunctionNeuralNetwork
             goFunctionComboBox.SelectionChanged += GoFunctionComboBox_SelectionChanged;
             goSyncCB.Checked += GoSyncCB_Checked;
             goSyncCB.Unchecked += GoSyncCB_Checked;
+
+            BrushConverter converter = new BrushConverter();
+            goX1minIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goX1maxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goX2minIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goX2maxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goYminIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goYmaxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+
+            goX1minIUP.ValueChanged += Input_ValueChanged;
+            goX1maxIUP.ValueChanged += Input_ValueChanged;
+            goX2minIUP.ValueChanged += Input_ValueChanged;
+            goX2maxIUP.ValueChanged += Input_ValueChanged;
+            goYminIUP.ValueChanged += Input_ValueChanged;
+            goYmaxIUP.ValueChanged += Input_ValueChanged;
+
             goX1minIUP.ValueChanged += DomainValueChanged;
             goX1maxIUP.ValueChanged += DomainValueChanged;
             goX2minIUP.ValueChanged += DomainValueChanged;
             goX2maxIUP.ValueChanged += DomainValueChanged;
             goYminIUP.ValueChanged += DomainValueChanged;
             goYmaxIUP.ValueChanged += DomainValueChanged;
+
+
+            goX1IntervalsIUD.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goX2IntervalsIUD.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goIterationsUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goConstantUD.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goLearningIntervalVisualizationIUD.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            goTestUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+
+            goX1IntervalsIUD.ValueChanged += Input_ValueChanged;
+            goX2IntervalsIUD.ValueChanged += Input_ValueChanged;
             goGradientFactorComboBox.SelectionChanged += GoGradientFactorComboBox_SelectionChanged;
+            goIterationsUpDown.ValueChanged += Input_ValueChanged;
+            goConstantUD.ValueChanged += Input_ValueChanged; ;
+            goLearningIntervalVisualizationIUD.ValueChanged += Input_ValueChanged;
+            goTestUpDown.ValueChanged += Input_ValueChanged;
 
             this.Loaded += MainWindow_Loaded;
         }
@@ -162,6 +196,7 @@ namespace FunctionNeuralNetwork
 
         void PrintWeightsUIElements()
         {
+            BrushConverter converter = new BrushConverter();
             goWeightNamesPanel.Children.Add(new Label() {Content="b3", Height=25, VerticalContentAlignment=VerticalAlignment.Center});
             Slider b3Slider = new Slider() { Minimum=-1, Maximum=1 , Height = 25,
                 VerticalContentAlignment = VerticalAlignment.Center, Value=NeuralNetwork.B3, SmallChange = 0.01 };
@@ -176,8 +211,11 @@ namespace FunctionNeuralNetwork
                 Value = NeuralNetwork.B3,
                 VerticalAlignment = VerticalAlignment.Center,
                 Height = 25,
+                Tag = "Weight"
             };
             doubleUpDownB3.ValueChanged += DoubleUpDown_ValueChanged;
+            doubleUpDownB3.ValueChanged += Input_ValueChanged;
+            doubleUpDownB3.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
             goWeigghtValuesPanel.Children.Add(doubleUpDownB3);
 
             for (int j=0; j<80; j++)
@@ -197,9 +235,12 @@ namespace FunctionNeuralNetwork
                     Increment = 0.1,
                     Value = NeuralNetwork.Wj[j],
                     VerticalAlignment = VerticalAlignment.Center,
-                    Height = 25
+                    Height = 25,
+                    Tag = "Weight"
                 };
                 doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
+                doubleUpDown.ValueChanged += Input_ValueChanged;
+                doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
                 goWeigghtValuesPanel.Children.Add(doubleUpDown);
             }
             
@@ -220,9 +261,12 @@ namespace FunctionNeuralNetwork
                     Increment = 0.1,
                     Value = NeuralNetwork.Bj[j],
                     VerticalAlignment = VerticalAlignment.Center,
-                    Height = 25
+                    Height = 25,
+                    Tag = "Weight"
                 };
                 doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
+                doubleUpDown.ValueChanged += Input_ValueChanged;
+                doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
                 goWeigghtValuesPanel.Children.Add(doubleUpDown);
                 
             }
@@ -246,40 +290,94 @@ namespace FunctionNeuralNetwork
                         Increment = 0.1,
                         Value = NeuralNetwork.Wij[i, j],
                         VerticalAlignment = VerticalAlignment.Center,
-                        Height = 25
+                        Height = 25,
+                        Tag = "Weight"
                     };
                     doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
+                    doubleUpDown.ValueChanged += Input_ValueChanged;
+                    doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
                     goWeigghtValuesPanel.Children.Add(doubleUpDown);
                 }
             }
         }
 
+        private void Input_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            string tag = null;
+            bool isNull = false;
+            BrushConverter converter = new BrushConverter();
+            if(sender == goConstantUD)
+            {
+                tag = (string)goConstantUD.Tag;
+                if (isNull = goGradientFactorComboBox.SelectedIndex == 2 && goConstantUD.Value is null)
+                    goConstantUD.BorderBrush = Brushes.Red;
+                else
+                    goConstantUD.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            }
+            else if (sender.GetType() == typeof(XCD.DoubleUpDown))
+            {
+                XCD.DoubleUpDown doubleUpDown = sender as XCD.DoubleUpDown;
+                tag = (string)doubleUpDown.Tag;
+                if (isNull = doubleUpDown.Value is null)
+                    doubleUpDown.BorderBrush = Brushes.Red;
+                else
+                    doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            }
+            else
+            {
+                XCD.IntegerUpDown integerUpDown = sender as XCD.IntegerUpDown;
+                tag = (string)integerUpDown.Tag;
+                if (isNull = integerUpDown.Value is null)
+                    integerUpDown.BorderBrush = Brushes.Red;
+                else
+                    integerUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+            }
+
+            switch (tag)
+            {
+                case "Domain":
+                    if (isNull)
+                        gsInvalidDomainUDs.Add(sender as InputBase);
+                    else
+                        gsInvalidDomainUDs.Remove(sender as InputBase);
+                    break;
+                case "Weight":
+                    if (isNull)
+                        gsInvalidWeightDoubleUDs.Add(sender as XCD.DoubleUpDown);
+                    else
+                        gsInvalidWeightDoubleUDs.Remove(sender as XCD.DoubleUpDown);
+                    break;
+                case "Learning":
+                    if (isNull)
+                        gsInvalidLearningOptions.Add(sender as InputBase);
+                    else
+                        gsInvalidLearningOptions.Remove(sender as InputBase);
+                    break;
+                case "Test":
+                    gbInvalidadTestParameter = isNull;
+                    break;
+                default:
+                    break;
+            }
+
+            bool lbInvalidWeight = gsInvalidWeightDoubleUDs.Count > 0;
+            bool lbInvaidDomain = gsInvalidDomainUDs.Count > 0;
+            bool lbInvalidLearning = gsInvalidLearningOptions.Count > 0 ;
+
+            goSaveB.IsEnabled = !lbInvalidWeight;
+            goRefreshB.IsEnabled = !lbInvaidDomain && !lbInvalidWeight;
+            goLearningButton.IsEnabled = !lbInvaidDomain && !lbInvalidLearning && !lbInvalidWeight;
+            goTestButton.IsEnabled = !lbInvaidDomain && !gbInvalidadTestParameter && !lbInvalidWeight;
+
+        }
+
         private void DoubleUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             XCD.DoubleUpDown doubleUpDown = sender as XCD.DoubleUpDown;
-            BrushConverter converter = new BrushConverter();
+
             if (doubleUpDown.Value is null)
-            {
-                doubleUpDown.BorderBrush = Brushes.Red;
-                goLearningButton.IsEnabled = false;
-                goTestButton.IsEnabled = false;
-                goRefreshB.IsEnabled = false;
-                goSaveB.IsEnabled = false;
-                gsInvalidWeightDoubleUDs.Add(doubleUpDown);
                 return;
-            }
-            doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-            gsInvalidWeightDoubleUDs.Remove(doubleUpDown);
-            if(gsInvalidWeightDoubleUDs.Count == 0)
-            {
-                goSaveB.IsEnabled = true;
-                if(gsInvalidDomainDoubleUDs.Count == 0)
-                {
-                    goLearningButton.IsEnabled = true;
-                    goTestButton.IsEnabled = true;
-                    goRefreshB.IsEnabled = true;
-                }
-            }
+
             int element = goWeigghtValuesPanel.Children.IndexOf(doubleUpDown);
             Slider slider = goWeightSlidersPanel.Children[element] as Slider;
             slider.ValueChanged -= WeightSlider_ValueChanged;
@@ -348,19 +446,6 @@ namespace FunctionNeuralNetwork
             XCD.DoubleUpDown doubleUpDown = goWeigghtValuesPanel.Children[element] as XCD.DoubleUpDown;
             doubleUpDown.ValueChanged -= DoubleUpDown_ValueChanged;
             doubleUpDown.Value = slider.Value;
-            BrushConverter converter = new BrushConverter();
-            doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-            gsInvalidWeightDoubleUDs.Remove(doubleUpDown);
-            if (gsInvalidWeightDoubleUDs.Count == 0)
-            {
-                goSaveB.IsEnabled = true;
-                if(gsInvalidDomainDoubleUDs.Count == 0)
-                {
-                    goLearningButton.IsEnabled = true;
-                    goTestButton.IsEnabled = true;
-                    goRefreshB.IsEnabled = true;
-                }
-            }
             doubleUpDown.ValueChanged += DoubleUpDown_ValueChanged;
             if (element == 0)
             {
@@ -390,43 +475,52 @@ namespace FunctionNeuralNetwork
 
         
 
-        void UpdateWeightSliders()
+        void UpdateWeightSlidersAndDoublesUD()
         {
-            foreach(Slider slider in goWeightSlidersPanel.Children)
-                slider.ValueChanged -= WeightSlider_ValueChanged;
-            
+            int lnTotalChildren = goWeightSlidersPanel.Children.Count;
+            for(int i = 0; i<lnTotalChildren; i++)
+            {
+                (goWeightSlidersPanel.Children[i] as Slider).ValueChanged -= WeightSlider_ValueChanged;
+                (goWeigghtValuesPanel.Children[i] as XCD.DoubleUpDown).ValueChanged -= DoubleUpDown_ValueChanged;
+            }
+
             int element = 1;
-            (goWeightSlidersPanel.Children[0] as Slider).Value = NeuralNetwork.B3;
-            (goWeigghtValuesPanel.Children[0] as Label).Content = Math.Round(NeuralNetwork.B3,3).ToString();
+            (goWeigghtValuesPanel.Children[0] as XCD.DoubleUpDown).Value = (goWeightSlidersPanel.Children[0] as Slider).Value = NeuralNetwork.B3;
+            
        
             for (int j = 0; j < 80; j++, element++)
             {
-                (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wj[j];
-                (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round(NeuralNetwork.Wj[j],3).ToString();
+                (goWeigghtValuesPanel.Children[element] as XCD.DoubleUpDown).Value = (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wj[j];
             }
 
             for (int j = 0; j < 80; j++, element++)
             {
-                (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Bj[j];
-                (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round(NeuralNetwork.Bj[j],3).ToString();
+                (goWeigghtValuesPanel.Children[element] as XCD.DoubleUpDown).Value = (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Bj[j];
             }
 
             for (int j = 0; j < 80; j++)
             {
                 for (int i = 0; i < 22; i++, element++)
                 {
-                    (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wij[i,j];
-                    (goWeigghtValuesPanel.Children[element] as Label).Content = Math.Round(NeuralNetwork.Wij[i,j],3).ToString();
+                    (goWeigghtValuesPanel.Children[element] as XCD.DoubleUpDown).Value = (goWeightSlidersPanel.Children[element] as Slider).Value = NeuralNetwork.Wij[i,j];
                 }
             }
 
-            foreach (Slider slider in goWeightSlidersPanel.Children)
-                slider.ValueChanged += WeightSlider_ValueChanged;
-            
+            BrushConverter converter = new BrushConverter();
+            for (int i = 0; i < lnTotalChildren; i++)
+            {
+                (goWeightSlidersPanel.Children[i] as Slider).BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                
+                (goWeightSlidersPanel.Children[i] as Slider).ValueChanged += WeightSlider_ValueChanged;
+                (goWeigghtValuesPanel.Children[i] as XCD.DoubleUpDown).ValueChanged += DoubleUpDown_ValueChanged;
+            }
+
         }
 
         public void VisualizeFunction(RendererEnum renderer)
         {
+            if (gsInvalidDomainUDs.Count > 0 || gsInvalidWeightDoubleUDs.Count > 0)
+                return;
             if (gsFunctionDefinitions.Count > 0)
             {
                 FunctionDefinition function = gsFunctionDefinitions[goFunctionComboBox.SelectedIndex];
@@ -709,7 +803,7 @@ namespace FunctionNeuralNetwork
 
         private void UpdateUIWeights()
         {
-            UpdateWeightSliders();
+            UpdateWeightSlidersAndDoublesUD();
             VisualizeFunction(RendererEnum.NeuralNetwork);
             NNViewer.UpdateAxonsColor();
         }
@@ -760,64 +854,63 @@ namespace FunctionNeuralNetwork
         {
             XCD.DoubleUpDown doubleUpDown = sender as XCD.DoubleUpDown;
             if(doubleUpDown.Value is null)
-            {
-                doubleUpDown.BorderBrush = Brushes.Red;
-                gsInvalidDomainDoubleUDs.Add(doubleUpDown);
-                goLearningButton.IsEnabled = false;
-                goTestButton.IsEnabled = false;
-                goRefreshB.IsEnabled = false;
                 return;
-            }
+
             BrushConverter converter = new BrushConverter();
-            doubleUpDown.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-            gsInvalidDomainDoubleUDs.Remove(doubleUpDown);
-
-
-            double x1Min = (double)goX1minIUP.Value;
-            double x1Max = (double)goX1maxIUP.Value;
-            double x2Min = (double)goX2minIUP.Value;
-            double x2Max = (double)goX2maxIUP.Value;
-            double yMin = (double)goYminIUP.Value;
-            double yMax = (double)goYmaxIUP.Value;
-            
-            if (x1Min >= x1Max)
+            if(!(goX1minIUP.Value is null) && !(goX1maxIUP.Value is null))
             {
-                goX1minIUP.BorderBrush = Brushes.Red;
-                goX1maxIUP.BorderBrush = Brushes.Red;
+                double x1Min = (double)goX1minIUP.Value;
+                double x1Max = (double)goX1maxIUP.Value;
+                if (x1Min >= x1Max)
+                {
+                    goX1minIUP.BorderBrush = Brushes.Red;
+                    goX1maxIUP.BorderBrush = Brushes.Red;
+                }
+                else
+                {
+                    goX1minIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                    goX1maxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                    X1Domain[0] = x1Min;
+                    X1Domain[1] = x1Max;
+                }
             }
-            else
+
+            if (!(goX2minIUP.Value is null) && !(goX2maxIUP.Value is null))
             {
-                goX1minIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-                goX1maxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-                X1Domain[0] = x1Min;
-                X1Domain[1] = x1Max;
+                double x2Min = (double)goX2minIUP.Value;
+                double x2Max = (double)goX2maxIUP.Value;
+                if (x2Min >= x2Max)
+                {
+                    goX2minIUP.BorderBrush = Brushes.Red;
+                    goX2maxIUP.BorderBrush = Brushes.Red;
+                }
+                else
+                {
+                    goX2minIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                    goX2maxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                    X2Domain[0] = x2Min;
+                    X2Domain[1] = x2Max;
+                }
+            }
+
+            if (!(goYminIUP.Value is null) && !(goYmaxIUP.Value is null))
+            {
+                double yMin = (double)goYminIUP.Value;
+                double yMax = (double)goYmaxIUP.Value;
+                if (yMin >= yMax)
+                {
+                    goYminIUP.BorderBrush = Brushes.Red;
+                    goYmaxIUP.BorderBrush = Brushes.Red;
+                }
+                else
+                {
+                    goYminIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                    goYmaxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
+                    YRange[0] = yMin;
+                    YRange[1] = yMax;
+                }
             }
                 
-            if (x2Min >= x2Max)
-            {
-                goX2minIUP.BorderBrush = Brushes.Red;
-                goX2maxIUP.BorderBrush = Brushes.Red;
-            }
-            else
-            {
-                goX2minIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-                goX2maxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-                X2Domain[0] = x2Min;
-                X2Domain[1] = x2Max;
-            }
-
-            if(yMin >= yMax)
-            {
-                goYminIUP.BorderBrush = Brushes.Red;
-                goYmaxIUP.BorderBrush = Brushes.Red;
-            }
-            else
-            {
-                goYminIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-                goYmaxIUP.BorderBrush = (Brush)converter.ConvertFromString("#FF569DE5");
-                YRange[0] = yMin;
-                YRange[1] = yMax;
-            }
         }
 
         private void GoTestButton_Click(object sender, RoutedEventArgs e)
@@ -851,6 +944,7 @@ namespace FunctionNeuralNetwork
         private void GoGradientFactorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             goConstantUD.IsEnabled = goGradientFactorComboBox.SelectedIndex == 2;
+            Input_ValueChanged(goConstantUD, null);
         }
     }
 

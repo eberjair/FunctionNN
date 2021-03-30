@@ -101,8 +101,8 @@
                         <Label Content="X1 Intervals (10-120):" Grid.Row="1" VerticalAlignment="Center"/>
                         <Label Content="X2 Intervals (10-120):" Grid.Row="2" VerticalAlignment="Center"/>
                         <CheckBox Name="goSyncCB" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,5"  IsChecked="True"/>
-                        <xctk:IntegerUpDown Name="goX1IntervalsIUD" Grid.Column="1" Grid.Row="1" Margin="10,3" Minimum="10" Maximum="120" Value="50"/>
-                        <xctk:IntegerUpDown Name="goX2IntervalsIUD" Grid.Column="1" Grid.Row="2" Margin="10,3" Minimum="10" Maximum="120" Value="50"/>
+                        <xctk:IntegerUpDown Name="goX1IntervalsIUD" Grid.Column="1" Grid.Row="1" Margin="10,3" Minimum="10" Maximum="120" Value="50" Tag="Domain"/>
+                        <xctk:IntegerUpDown Name="goX2IntervalsIUD" Grid.Column="1" Grid.Row="2" Margin="10,3" Minimum="10" Maximum="120" Value="50" Tag="Domain"/>
                     </Grid>
                     <Button Name="goRefreshB" Content="Refresh" Grid.Row="1" Margin="30,2" Click="GoRefreshB_Click"/>
                 </Grid>
@@ -148,27 +148,27 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <xctk:DoubleUpDown Name="goX1minIUP" Margin="8,1,7,1" Value="-4"  Increment="0.1"/>
-                            <xctk:DoubleUpDown Name="goX1maxIUP" Grid.Column="1" Margin="5,1,10,1" Value="4" Increment="0.1"/>
+                            <xctk:DoubleUpDown Name="goX1minIUP" Margin="8,1,7,1" Value="-4"  Increment="0.1" Tag="Domain"/>
+                            <xctk:DoubleUpDown Name="goX1maxIUP" Grid.Column="1" Margin="5,1,10,1" Value="4" Increment="0.1" Tag="Domain"/>
                         </Grid>
                         <Grid Grid.Row="2" Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <xctk:DoubleUpDown Name="goX2minIUP" Margin="10,1,5,1" Value="-4" Increment="0.1"/>
-                            <xctk:DoubleUpDown Name="goX2maxIUP" Grid.Column="1" Margin="5,1,10,1" Value="4" Increment="0.1" />
+                            <xctk:DoubleUpDown Name="goX2minIUP" Margin="10,1,5,1" Value="-4" Increment="0.1" Tag="Domain"/>
+                            <xctk:DoubleUpDown Name="goX2maxIUP" Grid.Column="1" Margin="5,1,10,1" Value="4" Increment="0.1" Tag="Domain"/>
                         </Grid>
                         <Grid Grid.Row="3" Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <xctk:DoubleUpDown Name="goYminIUP" Margin="10,1,5,1" Value="0" Increment="0.1"/>
-                            <xctk:DoubleUpDown Name="goYmaxIUP" Grid.Column="1" Margin="5,1,10,1" Value="1" Increment="0.1"/>
+                            <xctk:DoubleUpDown Name="goYminIUP" Margin="10,1,5,1" Value="0" Increment="0.1" Tag="Domain"/>
+                            <xctk:DoubleUpDown Name="goYmaxIUP" Grid.Column="1" Margin="5,1,10,1" Value="1" Increment="0.1" Tag="Domain"/>
                         </Grid>
                         
-                        <xctk:IntegerUpDown Name="goIterationsUpDown" Grid.Column="1" Grid.Row="4" Margin="10,14" Minimum="50" Maximum="10000000" Value="1000"/>
+                        <xctk:IntegerUpDown Name="goIterationsUpDown" Grid.Column="1" Grid.Row="4" Margin="10,14" Minimum="50" Maximum="10000000" Value="1000" Tag="Learning"/>
                         
                         <ComboBox Margin="10,2" Grid.Column="1" Grid.Row="5" Name="goGradientFactorComboBox" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" >
                             <ComboBoxItem Content="0.1/t"/>
@@ -176,9 +176,9 @@
                             <ComboBoxItem Content="Constant" IsSelected="True"/>
                         </ComboBox>
 
-                        <xctk:DoubleUpDown Name="goConstantUD" Grid.Column="1" Grid.Row="6" Margin="10,2" Minimum="0.0001" Maximum="10" Value="0.1" Increment="0.01"/>
+                        <xctk:DoubleUpDown Name="goConstantUD" Grid.Column="1" Grid.Row="6" Margin="10,2" Minimum="0.0001" Maximum="10" Value="0.1" Increment="0.01" Tag="Learning"/>
 
-                        <xctk:IntegerUpDown Name="goLearningIntervalVisualizationIUD" Grid.Column="1" Grid.Row="7" Margin="10,14" Minimum="0" Value="0"/>
+                        <xctk:IntegerUpDown Name="goLearningIntervalVisualizationIUD" Grid.Column="1" Grid.Row="7" Margin="10,14" Minimum="0" Value="0" Tag="Learning"/>
 
                     </Grid>
                     <Button Grid.Row="1" Margin="40,5" Content="Execute" Name="goLearningButton" Click="GoLearningButton_Click" Grid.Column="1" />
@@ -202,9 +202,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Content="Number of executions&#x0a;(50-100000):" VerticalAlignment="Center" HorizontalAlignment="Right" HorizontalContentAlignment="Right"/>
-                        <xctk:IntegerUpDown Grid.Column="1"  Margin="10,5" Minimum="50" Maximum="100000" Value="1000" Name="goTestUpDown"/>
-                        <!--<Label Content="Interval visualization:" VerticalAlignment="Center" Grid.Row="1" HorizontalAlignment="Right"/>
-                        <xctk:IntegerUpDown Name="goTestingIntervalVisualizationIUD" Grid.Column="1" Grid.Row="1" Margin="10,5" Minimum="0" Value="0"/>-->
+                        <xctk:IntegerUpDown Grid.Column="1"  Margin="10,5" Minimum="50" Maximum="100000" Value="1000" Name="goTestUpDown" Tag="Test"/>
                     </Grid>
                     <Button Grid.Row="1" Margin="40,5" Content="Execute" Name="goTestButton" Click="GoTestButton_Click"/>
                 </Grid>
