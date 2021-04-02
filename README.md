@@ -10,5 +10,9 @@ To add more possible functions for the neural network to imitate you can do it i
 ## Contribuiting
 Pull request are welcome. For major changes, please open an issue to discuss what you would like to change.
 
+## Contact
+Eber J. Flores A.
+eberjair@gmail.com
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
