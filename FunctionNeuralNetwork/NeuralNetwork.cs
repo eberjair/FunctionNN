@@ -34,7 +34,6 @@ namespace FunctionNeuralNetwork
         {
             Parameters = new NNParameters();
 
-            //Version2
             S1 = new double[22];
             S2 = new double[80];
 
@@ -54,7 +53,6 @@ namespace FunctionNeuralNetwork
 
         public void SetParameters(NNParameters parameters)
         {
-            //Version 2
             Parameters = parameters;
             X = Parameters.Mean;
             S = Parameters.Dev;
@@ -79,7 +77,6 @@ namespace FunctionNeuralNetwork
             X1 = x1;
             X2 = x2;
             
-            //Version 2
             //Layer 1
             for(int i=0; i<11; i++)
             {
@@ -106,7 +103,7 @@ namespace FunctionNeuralNetwork
             double lnN = lnGradientFactor;
             s3 = CalculateS3(x1, x2);
             
-            CalculateGradiants(Y);
+            CalculateGradients(Y);
 
             B3 += -lnN * B3G;
             if (B3 > 1) B3 = 1;
@@ -129,12 +126,22 @@ namespace FunctionNeuralNetwork
             
         }
 
-
+        /// <summary>
+        /// Not functional yet
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="x2"></param>
+        /// <param name="Y"></param>
+        /// <param name="lnGradientFactor"></param>
+        /// <param name="lbFirstIteration"></param>
+        /// <param name="lastIteration"></param>
+        /// <param name="newIteration"></param>
+        /// <param name="s3"></param>
         public void LearnFletcherReeves(double x1, double x2, double Y, double lnGradientFactor, bool lbFirstIteration, FletcherReevesIteration lastIteration, out FletcherReevesIteration newIteration, out double s3)
         {
             double lnN = lnGradientFactor;
             s3 = CalculateS3(x1, x2);
-            CalculateGradiants(Y);
+            CalculateGradients(Y);
 
             double RoB3 = 0;
             double[] RoWj = new double[80];
@@ -211,9 +218,8 @@ namespace FunctionNeuralNetwork
             newIteration.RoWj = RoWj;
         }
 
-        void CalculateGradiants(double Y)
+        void CalculateGradients(double Y)
         {
-            //Version 2
             double dEdS3 = S3 - Y;
             double dS3dz3 = S3 * (1 - S3);
             B3G = dEdS3 * dS3dz3;

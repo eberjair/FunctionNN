@@ -48,6 +48,10 @@ namespace FunctionNeuralNetwork
         
         bool gbDragStarted = false;
 
+        /// <summary>
+        /// Subroutine where the possible functions to learn are added.
+        /// Add here your own functions.
+        /// </summary>
         void AddFunctions()
         {
             gsFunctionDefinitions.Add(new FunctionDefinition(FunctionsImplementations.Gaussian, new double[2] { -4, 4 }, new double[2] { -4, 4 }, new double[2] { 0, 1 }, "y=exp(-(x1^2 + x2^2)/8)"));
@@ -134,8 +138,6 @@ namespace FunctionNeuralNetwork
             this.Loaded += MainWindow_Loaded;
         }
 
-        
-
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             PrintWeightsUIElements();
@@ -199,6 +201,9 @@ namespace FunctionNeuralNetwork
             return track?.Thumb;
         }
 
+        /// <summary>
+        /// Adding sliders and double up down controls.
+        /// </summary>
         void PrintWeightsUIElements()
         {
             BrushConverter converter = new BrushConverter();
@@ -478,8 +483,6 @@ namespace FunctionNeuralNetwork
             VisualizeFunction(RendererEnum.NeuralNetwork);
         }
 
-        
-
         void UpdateWeightSlidersAndDoublesUD()
         {
             int lnTotalChildren = goWeightSlidersPanel.Children.Count;
@@ -588,7 +591,6 @@ namespace FunctionNeuralNetwork
             }
         }
 
-
         private void GoLearningButton_Click(object sender, RoutedEventArgs e)
         {
             double x1Min = (double)goX1minIUP.Value;
@@ -631,7 +633,6 @@ namespace FunctionNeuralNetwork
             goLearningWorker.RunWorkerAsync(argument: learnArguments);
             progressWindow.ShowDialog();
         }
-
 
         void ExecuteLearning(object sender, DoWorkEventArgs e)
         {
@@ -757,6 +758,10 @@ namespace FunctionNeuralNetwork
             progressWindow.Close();
         }
 
+        /// <summary>
+        /// Generates random neural network/function input value for X1.
+        /// </summary>
+        /// <returns>Normalized value and value within the domain</returns>
         double[] GenerateX1()
         {
             double x1min = X1Domain[0];
@@ -766,6 +771,10 @@ namespace FunctionNeuralNetwork
             return values;
         }
 
+        /// <summary>
+        /// Generates random neural network/function input value for X2.
+        /// </summary>
+        /// <returns>Normalized value and value within the domain</returns>
         double[] GenerateX2()
         {
             double x2min = X2Domain[0];
@@ -806,6 +815,9 @@ namespace FunctionNeuralNetwork
             }
         }
 
+        /// <summary>
+        /// Updates sliders, double-up-down, neural network viewer and neural network viewer.
+        /// </summary>
         private void UpdateUIWeights()
         {
             UpdateWeightSlidersAndDoublesUD();

@@ -17,11 +17,6 @@ namespace FunctionNeuralNetwork
         public double[] Wj { get; set; } //Layer 3
 
 
-        //public double[] Mean { get; set; } //Layer 1
-        //public double[] Dev { get; set; } //Layer 1
-        //public double[] W { get; set; } //Layer 2
-        //public double[] R { get; set; } //Layer 4
-
         public NNParameters()
         {
             Random random = new Random();
