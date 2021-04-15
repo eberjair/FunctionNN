@@ -18,20 +18,24 @@
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="*" MinHeight="100"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="*" MinHeight="100"/>
             </Grid.RowDefinitions>
 
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="*" MinWidth="100"/>
+                    <ColumnDefinition Width="5"/>
+                    <ColumnDefinition Width="*" MinWidth="100"/>
                 </Grid.ColumnDefinitions>
-                <WindowsFormsHost Name="goNNHost" Margin="3"/>
-                <oxy:PlotView Name="goPlotView" Model="{Binding PlotModel}" Grid.Column="1"  />
+                <WindowsFormsHost Name="goNNHost"  Grid.Column="0"/>
+                <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" Width="5" Background="DimGray" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"/>
+                <oxy:PlotView Name="goPlotView" Model="{Binding PlotModel}" Grid.Column="2"  />
             </Grid>
+            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Height="5" Background="DimGray"/>
 
-            <WindowsFormsHost Name="goFuncHost" Margin="3" Grid.Row="1"/>
+            <WindowsFormsHost Name="goFuncHost" Grid.Row="2"/>
 
         </Grid>
         <Grid Grid.Column="1">
