@@ -90,6 +90,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="CircularProgressBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RefreshWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Viewers\FunctionViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -103,10 +111,16 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ChartModel.cs" />
+    <Compile Include="CircularProgressBar.xaml.cs">
+      <DependentUpon>CircularProgressBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FletcherReevesIteration.cs" />
     <Compile Include="Functions\FunctionDefinition.cs" />
     <Compile Include="Functions\FunctionsImplementations.cs" />
     <Compile Include="ExecutionParameters.cs" />
+    <Compile Include="RefreshWindow.xaml.cs">
+      <DependentUpon>RefreshWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Viewers\AxonRenderer.cs" />
     <Compile Include="Viewers\FunctionViewer.xaml.cs">
       <DependentUpon>FunctionViewer.xaml</DependentUpon>

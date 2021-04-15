@@ -19,6 +19,7 @@ using FunctionNeuralNetwork.Functions;
 using Microsoft.Win32;
 using XCD= Xceed.Wpf.Toolkit;
 using Xceed.Wpf.Toolkit.Primitives;
+using System.Windows.Threading;
 
 namespace FunctionNeuralNetwork
 {
@@ -37,6 +38,8 @@ namespace FunctionNeuralNetwork
         bool gbInvalidadTestParameter;
 
         ProgressWindow progressWindow;
+        RefreshWindow refreshWindow;
+        Thread refreshThread;
         FunctionViewer FunctionViewer;
         NNViewer NNViewer;
         Random random;
@@ -483,10 +486,11 @@ namespace FunctionNeuralNetwork
             VisualizeFunction(RendererEnum.NeuralNetwork);
         }
 
+        
         void UpdateWeightSlidersAndDoublesUD()
         {
             int lnTotalChildren = goWeightSlidersPanel.Children.Count;
-            for(int i = 0; i<lnTotalChildren; i++)
+            for (int i = 0; i<lnTotalChildren; i++)
             {
                 (goWeightSlidersPanel.Children[i] as Slider).ValueChanged -= WeightSlider_ValueChanged;
                 (goWeigghtValuesPanel.Children[i] as XCD.DoubleUpDown).ValueChanged -= DoubleUpDown_ValueChanged;
@@ -522,7 +526,14 @@ namespace FunctionNeuralNetwork
                 (goWeightSlidersPanel.Children[i] as Slider).ValueChanged += WeightSlider_ValueChanged;
                 (goWeigghtValuesPanel.Children[i] as XCD.DoubleUpDown).ValueChanged += DoubleUpDown_ValueChanged;
             }
+            
+        }
 
+        private void Window_LayoutUpdated(object sender, EventArgs e)
+        {
+            this.LayoutUpdated -= Window_LayoutUpdated;
+            refreshWindow.AllowClosing();
+            refreshWindow.Dispatcher.BeginInvoke(new Action(() => { refreshWindow.Close(); }));
         }
 
         public void VisualizeFunction(RendererEnum renderer)
@@ -728,8 +739,9 @@ namespace FunctionNeuralNetwork
 
         private void GoWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            UpdateUIWeights();
             double[] lsErrorsResult = (double[])e.Result;
-            if(gnNextResultsIndex < gsErrorResults.Length)
+            if (gnNextResultsIndex < gsErrorResults.Length)
             {
                 lsErrorsResult.CopyTo(gsErrorResults, gnNextResultsIndex);
                 double[] dataToVisualize;
@@ -753,10 +765,12 @@ namespace FunctionNeuralNetwork
                 ChartModel chartModel = new ChartModel(dataToVisualize);
                 goPlotView.Model = chartModel.PlotModel;
             }
-            UpdateUIWeights();
+            
             progressWindow.AllowClosing();
             progressWindow.Close();
         }
+
+
 
         /// <summary>
         /// Generates random neural network/function input value for X1.
@@ -811,7 +825,7 @@ namespace FunctionNeuralNetwork
             {
                 NNParameters parameters = new NNParameters();
                 NeuralNetwork.SetParameters(parameters);
-                UpdateUIWeights();
+                UpdateUIWeights();                
             }
         }
 
@@ -820,6 +834,21 @@ namespace FunctionNeuralNetwork
         /// </summary>
         private void UpdateUIWeights()
         {
+            Thread newWindowThread = new Thread(new ThreadStart(() =>
+            {    
+                SynchronizationContext.SetSynchronizationContext(
+                    new DispatcherSynchronizationContext(
+                        Dispatcher.CurrentDispatcher));
+                refreshWindow = new RefreshWindow();
+                refreshWindow.Closed += (s, e) =>
+                   Dispatcher.CurrentDispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
+                refreshWindow.Show();
+                Dispatcher.Run();
+            }));
+            newWindowThread.SetApartmentState(ApartmentState.STA);
+            newWindowThread.IsBackground = true;
+            newWindowThread.Start();
+            this.LayoutUpdated += Window_LayoutUpdated;
             UpdateWeightSlidersAndDoublesUD();
             VisualizeFunction(RendererEnum.NeuralNetwork);
             NNViewer.UpdateAxonsColor();
