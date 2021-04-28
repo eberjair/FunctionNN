@@ -23,6 +23,22 @@ using System.Windows.Threading;
 
 namespace FunctionNeuralNetwork
 {
+    //<< Taken from vtkRenderWindow.h
+    public enum VTK_CURSORS
+    {
+        DEFAULT = 0,
+        ARROW = 1,
+        SIZENE = 2,
+        SIZENW = 3,
+        SIZESW = 4,
+        SIZESE = 5,
+        SIZENS = 6,
+        SIZEWE = 7,
+        SIZEALL = 8,
+        HAND = 9,
+        CROSSHAIR = 10
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -39,7 +55,6 @@ namespace FunctionNeuralNetwork
 
         ProgressWindow progressWindow;
         RefreshWindow refreshWindow;
-        Thread refreshThread;
         FunctionViewer FunctionViewer;
         NNViewer NNViewer;
         Random random;
@@ -604,20 +619,7 @@ namespace FunctionNeuralNetwork
 
         private void GoLearningButton_Click(object sender, RoutedEventArgs e)
         {
-            double x1Min = (double)goX1minIUP.Value;
-            double x1Max = (double)goX1maxIUP.Value;
-            double x2Min = (double)goX2minIUP.Value;
-            double x2Max = (double)goX2maxIUP.Value;
-            if (x1Min >= x1Max || x2Min >= x2Max)
-            {
-                MessageBox.Show("Invalid function domain", "Parameters error", MessageBoxButton.OK);
-                return;
-            }
-            if (goYminIUP.Value >= goYmaxIUP.Value)
-            {
-                MessageBox.Show("Invalid function range", "Parameters error", MessageBoxButton.OK);
-                return;
-            }
+            if (!ValidDomainAndRegion()) return;
 
             GradientFactorType factor = GradientFactorType.n;
             switch(goGradientFactorComboBox.SelectedIndex)
@@ -780,8 +782,16 @@ namespace FunctionNeuralNetwork
         {
             double x1min = X1Domain[0];
             double x1max = X1Domain[1];
+            if(FunctionViewer.IsRegionSelected)
+            {
+                double[] lsBounds = FunctionViewer.RegionBounds;
+                x1min = Math.Max(x1min, lsBounds[0]);
+                x1max = Math.Min(x1max, lsBounds[1]);
+            }
             double[] values = new double[2] { random.NextDouble(), 0 };
             values[1] = values[0] * (x1max - x1min) + x1min;
+            if(FunctionViewer.IsRegionSelected)
+                values[0] = (values[1] - X1Domain[0]) / (X1Domain[1] - X1Domain[0]);
             return values;
         }
 
@@ -793,8 +803,16 @@ namespace FunctionNeuralNetwork
         {
             double x2min = X2Domain[0];
             double x2max = X2Domain[1];
+            if (FunctionViewer.IsRegionSelected)
+            {
+                double[] lsBounds = FunctionViewer.RegionBounds;
+                x2min = Math.Max(x2min, lsBounds[2]);
+                x2max = Math.Min(x2max, lsBounds[3]);
+            }
             double[] values = new double[2] { random.NextDouble(), 0 };
             values[1] = values[0] * (x2max - x2min) + x2min;
+            if (FunctionViewer.IsRegionSelected)
+                values[0] = (values[1] - X2Domain[0]) / (X2Domain[1] - X2Domain[0]);
             return values;
         }
 
@@ -961,20 +979,7 @@ namespace FunctionNeuralNetwork
 
         private void GoTestButton_Click(object sender, RoutedEventArgs e)
         {
-            double x1Min = (double)goX1minIUP.Value;
-            double x1Max = (double)goX1maxIUP.Value;
-            double x2Min = (double)goX2minIUP.Value;
-            double x2Max = (double)goX2maxIUP.Value;
-            if (x1Min >= x1Max || x2Min >= x2Max)
-            {
-                MessageBox.Show("Invalid function domain", "Parameters error", MessageBoxButton.OK);
-                return;
-            }
-            if (goYminIUP.Value >= goYmaxIUP.Value)
-            {
-                MessageBox.Show("Invalid function range", "Parameters error", MessageBoxButton.OK);
-                return;
-            }
+            if (!ValidDomainAndRegion()) return;
 
             int iterations = (int)goTestUpDown.Value;
             gnNextResultsIndex = 0;
@@ -985,6 +990,34 @@ namespace FunctionNeuralNetwork
             BackgroundArguments backgroundArguments = new BackgroundArguments(testingParameters, NeuralNetwork);
             goTestingWorker.RunWorkerAsync(argument: backgroundArguments);
             progressWindow.ShowDialog();
+        }
+
+        bool ValidDomainAndRegion()
+        {
+            double x1Min = (double)goX1minIUP.Value;
+            double x1Max = (double)goX1maxIUP.Value;
+            double x2Min = (double)goX2minIUP.Value;
+            double x2Max = (double)goX2maxIUP.Value;
+            if (x1Min >= x1Max || x2Min >= x2Max)
+            {
+                MessageBox.Show("Invalid function domain", "Parameters error", MessageBoxButton.OK);
+                return false;
+            }
+            if (goYminIUP.Value >= goYmaxIUP.Value)
+            {
+                MessageBox.Show("Invalid function range", "Parameters error", MessageBoxButton.OK);
+                return false;
+            }
+            if (FunctionViewer.IsRegionSelected)
+            {
+                double[] lsBounds = FunctionViewer.RegionBounds;
+                if (lsBounds[0] > x1Max || lsBounds[2] > x2Max || lsBounds[1] < x1Min || lsBounds[3] < x2Min)
+                {
+                    MessageBox.Show("Invalid selected region", "Region error", MessageBoxButton.OK);
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void GoGradientFactorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

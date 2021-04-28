@@ -7,6 +7,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-            
+        <Grid>
+            <Grid.ContextMenu>
+                <ContextMenu Name="goContextMenu">
+                    <MenuItem Name="goSelectorItem" Header="Select Region"/>
+                </ContextMenu>
+            </Grid.ContextMenu>
+        </Grid>  
     </Grid>
 </UserControl>

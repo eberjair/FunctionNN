@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Kitware.VTK;
+using System.Diagnostics;
+using FunctionNeuralNetwork.Viewers.Renderers;
 
 
 namespace FunctionNeuralNetwork
@@ -24,6 +26,10 @@ namespace FunctionNeuralNetwork
     /// </summary>
     public partial class FunctionViewer : UserControl
     {
+        enum InteractionStatus { Default, StartingSelector, DrawingSelector }
+        const int RESET_PIXEL_DISTANCE = 25;  //squared
+        const int RESET_TIME_ELAPSED = 750;
+
         MainWindow goParent;
 
         //Rendering stuff
@@ -36,6 +42,7 @@ namespace FunctionNeuralNetwork
         vtkCamera goCamera;
         RenderWindowControl goRenderWindowControl;
         vtkInteractorStyleTrackballCamera goTackballStyle;
+        vtkInteractorStyleImage goPlanViewStyle;
 
         //vtk objects visualization
         vtkPoints goPointsFunction;
@@ -59,9 +66,23 @@ namespace FunctionNeuralNetwork
         vtkOrientationMarkerWidget goOrientationFunction;
         vtkOrientationMarkerWidget goOrientationNN;
 
+        //Interactions
+        vtkWorldPointPicker goWorldPointPicker;
+        vtkRenderer goRendererPicked;
+        InteractionStatus geInteractionStatus = InteractionStatus.Default;
+        Stopwatch goTimer;
+        int gnNumberOfClicks;
+        int[] gsLastEventPosition;
+        RectangularSelectionRenderer goSelectorFunction;
+        RectangularSelectionRenderer goSelectorNN;
+
 
         public bool gbRenderized;
         bool gbSync;
+
+        public bool IsRegionSelected { get { return geInteractionStatus == InteractionStatus.StartingSelector && goSelectorFunction.RegionDefined; } }
+
+        public double[] RegionBounds { get { return goSelectorFunction.GetBounds(); } }
 
         public bool Synchronized
         {
@@ -82,6 +103,8 @@ namespace FunctionNeuralNetwork
                 else
                 {
                     vtkCamera loCamera = new vtkCamera();
+                    if (geInteractionStatus == InteractionStatus.StartingSelector)
+                        loCamera.SetParallelProjection(1);
                     double[] lsTemp = goCamera.GetClippingRange();
                     loCamera.SetClippingRange(lsTemp[0], lsTemp[1]);
                     lsTemp = goCamera.GetFocalPoint();
@@ -90,6 +113,9 @@ namespace FunctionNeuralNetwork
                     loCamera.SetPosition(lsTemp[0], lsTemp[1], lsTemp[2]);
                     lsTemp = goCamera.GetViewUp();
                     loCamera.SetViewUp(lsTemp[0], lsTemp[1], lsTemp[2]);
+                    if(geInteractionStatus == InteractionStatus.StartingSelector)
+                        loCamera.SetParallelScale(goCamera.GetParallelScale());
+                    
                     goRendererNN.SetActiveCamera(loCamera);
 
                     goOrientationNN.SetCurrentRenderer(goRendererNN);
@@ -106,6 +132,9 @@ namespace FunctionNeuralNetwork
         {
             goParent = parent;
             InitializeComponent();
+
+            gsLastEventPosition = new int[2];
+
 
             //Interop host control
             goWFormsHost = loWFH;
@@ -137,6 +166,7 @@ namespace FunctionNeuralNetwork
             //VTk stuff
             goInteractor = new vtkRenderWindowInteractor();
             goTackballStyle = new vtkInteractorStyleTrackballCamera();
+            goPlanViewStyle = new vtkInteractorStyleImage();
             goInteractor.SetInteractorStyle(goTackballStyle);
             goRendererFunction = vtkRenderer.New();
             goCamera = goRendererFunction.GetActiveCamera();
@@ -146,6 +176,10 @@ namespace FunctionNeuralNetwork
 
             gbRenderized = false;
             gbSync = true;
+
+            goSelectorFunction = new RectangularSelectionRenderer();
+            goSelectorNN = new RectangularSelectionRenderer();
+
             goRenderWindowControl.Load += GoRenderWindowControlLoad;
         }
 
@@ -172,8 +206,19 @@ namespace FunctionNeuralNetwork
 
                 gbRenderized = true;
                 goParent.VisualizeFunction(RendererEnum.Both);
+                goTimer = new Stopwatch();
+                goWorldPointPicker = new vtkWorldPointPicker();
+
+                goSelectorItem.Click += GoSelectorItem_Click;
+                goTackballStyle.RightButtonPressEvt += RightButtonPressEvt;
+                goPlanViewStyle.RightButtonPressEvt += RightButtonPressEvt;
+                goPlanViewStyle.MouseMoveEvt += GoPlanViewStyle_MouseMoveEvt;
+                goPlanViewStyle.LeftButtonPressEvt += GoPlanViewStyle_LeftButtonPressEvt;
+                goPlanViewStyle.LeftButtonReleaseEvt += GoPlanViewStyle_LeftButtonReleaseEvt;
             }
         }
+
+        
 
         void InitializeVisualizationObjects()
         {
@@ -300,6 +345,129 @@ namespace FunctionNeuralNetwork
             
             goInteractor.Render();
         }
+
+        #region InteractionLogic
+        private void RightButtonPressEvt(vtkObject sender, vtkObjectEventArgs e)
+        {
+            goContextMenu.IsOpen = true;
+        }
+
+        private void GoSelectorItem_Click(object sender, RoutedEventArgs e)
+        {
+            if(geInteractionStatus == InteractionStatus.Default)
+            {
+                double[] lsFocalPoint = goCamera.GetFocalPoint();
+                goCamera.SetFocalPoint(lsFocalPoint[0], lsFocalPoint[1], 0d);
+                goCamera.SetPosition(lsFocalPoint[0], lsFocalPoint[1], 1000d);
+                goCamera.SetViewUp(0, 1d, 0);
+                goCamera.SetParallelProjection(1);
+                goRendererFunction.ResetCamera();
+                if (!gbSync)
+                {
+                    goParent.goSyncCB.IsChecked = true;
+                    
+                }
+                goInteractor.SetInteractorStyle(goPlanViewStyle);
+                geInteractionStatus = InteractionStatus.StartingSelector;
+                goSelectorItem.Header = "Default mode";
+                goParent.goSyncCB.IsEnabled = false;
+            }
+            else
+            {
+                goCamera.SetParallelProjection(0);
+                goInteractor.SetInteractorStyle(goTackballStyle);
+                geInteractionStatus = InteractionStatus.Default;
+                goSelectorItem.Header = "Select Region";
+                goSelectorFunction.Remove(goRendererFunction);
+                goSelectorFunction.Remove(goRendererNN);
+                goParent.goSyncCB.IsEnabled = true;
+            }
+            goInteractor.Render();
+            goContextMenu.IsOpen = false;
+        }
+
+
+        
+        bool IsDoubleClick(int[] lsEventPosition)
+        {
+            goTimer.Stop();
+            gnNumberOfClicks++;
+            int lnXDistance = gsLastEventPosition[0] - lsEventPosition[0];
+            int lnYDistance = gsLastEventPosition[1] - lsEventPosition[1];
+            gsLastEventPosition = lsEventPosition;
+            int lnSquaredMoveDistance = lnXDistance * lnXDistance + lnYDistance * lnYDistance;
+            if (lnSquaredMoveDistance > RESET_PIXEL_DISTANCE || goTimer.ElapsedMilliseconds > RESET_TIME_ELAPSED)
+            {
+                gnNumberOfClicks = 1;
+                goTimer.Restart();
+                return false;
+            }
+            if (gnNumberOfClicks == 2 && goTimer.ElapsedMilliseconds <= RESET_TIME_ELAPSED)
+            {
+                gnNumberOfClicks = 0;
+                return true;
+            }
+            return false;
+        }
+
+        private void GoPlanViewStyle_LeftButtonPressEvt(vtkObject sender, vtkObjectEventArgs e)
+        {
+            int[] lsEventPosition = goInteractor.GetEventPosition();
+            goRendererPicked = goInteractor.FindPokedRenderer(lsEventPosition[0], lsEventPosition[1]);
+            double[] lsPickedPoint;
+            if (IsDoubleClick(lsEventPosition))
+            {
+                lsPickedPoint = PickWorldPoint(lsEventPosition, goRendererPicked);
+                double maxHeight = goLUTFunction.GetRange()[1];
+                lsPickedPoint[2] = maxHeight + 0.1;
+                double viewerHeight = goRendererPicked.GetActiveCamera().GetParallelScale();
+                goSelectorFunction.SetInitialPoint(lsPickedPoint, viewerHeight * 0.01);
+                goSelectorFunction.SetEndingPoint(lsPickedPoint);
+                goSelectorFunction.Render(goRendererNN);
+                goSelectorFunction.Render(goRendererFunction);
+                geInteractionStatus = InteractionStatus.DrawingSelector;
+                goVTKWindow.SetCurrentCursor((int)VTK_CURSORS.CROSSHAIR);
+                goInteractor.Render();
+            }
+            else
+            {
+                goInteractor.MiddleButtonPressEvent();
+            }
+        }
+
+        private void GoPlanViewStyle_LeftButtonReleaseEvt(vtkObject sender, vtkObjectEventArgs e)
+        {
+            if(geInteractionStatus== InteractionStatus.DrawingSelector)
+            {
+                geInteractionStatus = InteractionStatus.StartingSelector;
+                goVTKWindow.SetCurrentCursor((int)VTK_CURSORS.DEFAULT);
+            }
+            goInteractor.MiddleButtonReleaseEvent();
+        }
+
+        private double[] PickWorldPoint(int[] lsEventPosition, vtkRenderer loRenderer)
+        {
+            goWorldPointPicker.Pick(lsEventPosition[0], lsEventPosition[1], 0, loRenderer);
+            return goWorldPointPicker.GetPickPosition();
+        }
+
+        private void GoPlanViewStyle_MouseMoveEvt(vtkObject sender, vtkObjectEventArgs e)
+        {
+            int[] lsEventPosition = goInteractor.GetEventPosition();
+            if (geInteractionStatus == InteractionStatus.DrawingSelector)
+            {
+                double[] lsWorldPoint = PickWorldPoint(lsEventPosition, goRendererPicked);
+                goSelectorFunction.SetEndingPoint(lsWorldPoint);
+                goInteractor.Render();
+                return;
+            }
+            goPlanViewStyle.MouseMoveEvt -= GoPlanViewStyle_MouseMoveEvt;
+            goInteractor.MouseMoveEvent();
+            goPlanViewStyle.MouseMoveEvt += GoPlanViewStyle_MouseMoveEvt;
+        }
+
+        #endregion
+
 
     }
 }

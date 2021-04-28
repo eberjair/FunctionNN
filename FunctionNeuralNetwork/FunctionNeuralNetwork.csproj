@@ -90,6 +90,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Viewers\Renderers\PlanViewSelector.cs" />
+    <Compile Include="Viewers\Renderers\RectangularSelectionRenderer.cs" />
     <Page Include="CircularProgressBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -121,7 +123,7 @@
     <Compile Include="RefreshWindow.xaml.cs">
       <DependentUpon>RefreshWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Viewers\AxonRenderer.cs" />
+    <Compile Include="Viewers\Renderers\AxonRenderer.cs" />
     <Compile Include="Viewers\FunctionViewer.xaml.cs">
       <DependentUpon>FunctionViewer.xaml</DependentUpon>
     </Compile>
@@ -143,7 +145,7 @@
   <ItemGroup>
     <Compile Include="NeuralNetwork.cs" />
     <Compile Include="NNParameters.cs" />
-    <Compile Include="Viewers\NeuronRenderer.cs" />
+    <Compile Include="Viewers\Renderers\NeuronRenderer.cs" />
     <Compile Include="Viewers\NNViewer.xaml.cs">
       <DependentUpon>NNViewer.xaml</DependentUpon>
     </Compile>
